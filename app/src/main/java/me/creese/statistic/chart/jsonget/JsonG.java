@@ -16,12 +16,14 @@
 
 package me.creese.statistic.chart.jsonget;
 
-import me.creese.jsonget.annotation.JsonField;
-import me.creese.jsonget.annotation.UseConstructor;
-import me.creese.jsonget.annotation.UseMethod;
+
 
 import java.lang.reflect.*;
 import java.util.*;
+
+import me.creese.statistic.chart.jsonget.annotation.JsonField;
+import me.creese.statistic.chart.jsonget.annotation.UseConstructor;
+import me.creese.statistic.chart.jsonget.annotation.UseMethod;
 
 public class JsonG {
 
