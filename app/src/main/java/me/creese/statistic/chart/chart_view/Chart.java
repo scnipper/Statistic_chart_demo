@@ -5,6 +5,8 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -19,6 +21,11 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
 
     private DrawThread drawThread;
     private ArrayList<LineChart> lines;
+    private boolean isHitInSizeRect;
+    private float downX;
+    private float downY;
+    private boolean isHitLeftLine;
+    private boolean isHitRightLine;
 
     public Chart(Context context) {
         super(context);
@@ -48,13 +55,55 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
     }
 
 
-
     public void addLine(LineChart lineChart) {
         lines.add(lineChart);
     }
 
     public ArrayList<LineChart> getLines() {
         return lines;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        int actionMasked = event.getActionMasked();
+
+        SizeRect sizeRect = drawThread.getSizeRect();
+
+
+        switch (actionMasked) {
+            case MotionEvent.ACTION_UP:
+                isHitInSizeRect = false;
+                isHitRightLine = false;
+                isHitLeftLine = false;
+                Log.w(TAG, "onTouchEvent: touch up" );
+                break;
+            case MotionEvent.ACTION_DOWN:
+                downX = event.getX()-sizeRect.getX();
+
+                if (sizeRect.hit(event.getX(),event.getY())) {
+                    isHitInSizeRect = true;
+                } else if(sizeRect.hitLeftLine(event.getX(),event.getY())) {
+                    isHitLeftLine = true;
+                } else if(sizeRect.hitRightLine(event.getX(),event.getY())) {
+                    isHitRightLine = true;
+
+                }
+            case MotionEvent.ACTION_MOVE:
+                if(isHitInSizeRect) {
+                    sizeRect.setX(event.getX()-downX);
+                } else if(isHitRightLine) {
+                    sizeRect.setWidth(event.getX()-sizeRect.getX());
+                } else if(isHitLeftLine) {
+
+
+                    sizeRect.setLeft(event.getX());
+                }
+                break;
+
+        }
+
+        return true;
     }
 
     @Override
@@ -81,12 +130,11 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
         boolean retry = true;
         drawThread.setRunning(false);
 
-        while(retry) {
+        while (retry) {
             try {
                 drawThread.join();
                 retry = false;
-            }
-            catch (InterruptedException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }

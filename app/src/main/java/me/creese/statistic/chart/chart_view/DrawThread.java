@@ -1,5 +1,6 @@
 package me.creese.statistic.chart.chart_view;
 
+import android.animation.ValueAnimator;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -8,7 +9,9 @@ import android.view.SurfaceHolder;
 
 import java.util.ArrayList;
 
-public class DrawThread extends Thread {
+import me.creese.statistic.chart.chart_view.impl.Drawable;
+
+public class DrawThread extends Thread implements Drawable {
     private static final long FRAME_TIME = 16_666_670; // ms ~ 60 fps
     private static final String TAG = DrawThread.class.getSimpleName();
     private final Chart chart;
@@ -19,6 +22,7 @@ public class DrawThread extends Thread {
     private Matrix matrix;
     private boolean running;
     private boolean pause;
+    private float delta;
 
     public DrawThread(Chart chart) {
         this.chart = chart;
@@ -31,6 +35,7 @@ public class DrawThread extends Thread {
 
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0x88517da2);
         sizeRect = new SizeRect();
 
 
@@ -44,6 +49,14 @@ public class DrawThread extends Thread {
         this.pause = pause;
     }
 
+    public SizeRect getSizeRect() {
+        return sizeRect;
+    }
+
+    public float getDelta() {
+        return delta;
+    }
+
     @Override
     public void run() {
         Canvas canvas;
@@ -51,9 +64,9 @@ public class DrawThread extends Thread {
             if (pause) continue;
 
             long time = System.nanoTime();
-            long delta = time - prevTime;
+            long elapsed = time - prevTime;
 
-            if (delta < FRAME_TIME) continue;
+            if (elapsed < FRAME_TIME) continue;
 
             prevTime = time;
 
@@ -61,7 +74,8 @@ public class DrawThread extends Thread {
             canvas = holder.lockCanvas();
             if (canvas != null) {
                 synchronized (chart) {
-                    draw(canvas, delta / 1000_000_000.f);
+                    delta = elapsed / 1000_000_000.f;
+                    draw(canvas);
                 }
 
                 holder.unlockCanvasAndPost(canvas);
@@ -71,7 +85,8 @@ public class DrawThread extends Thread {
         }
     }
 
-    private void draw(Canvas canvas, float delta) {
+    @Override
+    public void draw(Canvas canvas) {
 
         canvas.drawColor(Color.WHITE);
 
@@ -81,19 +96,21 @@ public class DrawThread extends Thread {
         canvas.drawText((int) (1/delta)+" fps",0,60,text);
 
 
-
         ArrayList<LineChart> lines = chart.getLines();
         for (LineChart line : lines) {
-            line.normPoints(canvas.getWidth(),canvas.getHeight()-216);
-            line.getMatrix().setTranslate(0,0);
+            int widthLine = (int) (canvas.getWidth() * (canvas.getWidth()/sizeRect.getWidth()));
+
+            line.normPoints(widthLine,canvas.getHeight()-216);
+            line.getMatrix().setTranslate(-sizeRect.getX()*(widthLine/(float)canvas.getWidth()),0);
             line.draw(canvas);
             // small bottom lines
             line.normPoints(canvas.getWidth(),112);
             line.getMatrix().setTranslate(0,canvas.getHeight()-120);
             line.draw(canvas);
         }
-        paint.setColor(0x22517da2);
-        canvas.drawRect(0,canvas.getHeight()-125,canvas.getWidth(),canvas.getHeight(),paint);
+
+        canvas.drawRect(0,canvas.getHeight()-125,sizeRect.getX(),canvas.getHeight(),paint);
+        canvas.drawRect(sizeRect.getX()+sizeRect.getWidth(),canvas.getHeight()-125,canvas.getWidth(),canvas.getHeight(),paint);
 
         sizeRect.draw(canvas);
         //matrix.postTranslate(100 * delta, 0);

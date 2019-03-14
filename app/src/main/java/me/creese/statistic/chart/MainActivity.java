@@ -63,6 +63,13 @@ public class MainActivity extends AppCompatActivity {
                 lineChart.addPoint(new ChartPoint(200,170));
                 lineChart.addPoint(new ChartPoint(260,200));
                 lineChart.addPoint(new ChartPoint(360,2000));
+                lineChart.addPoint(new ChartPoint(500,150));
+                lineChart.addPoint(new ChartPoint(560,1500));
+                lineChart.addPoint(new ChartPoint(660,2000));
+                lineChart.addPoint(new ChartPoint(730,900));
+                lineChart.addPoint(new ChartPoint(800,300));
+                lineChart.addPoint(new ChartPoint(960,1800));
+                lineChart.addPoint(new ChartPoint(1160,250));
                 lineChart.setColorLine(Color.BLACK);
                 chart.addLine(lineChart);
             }
