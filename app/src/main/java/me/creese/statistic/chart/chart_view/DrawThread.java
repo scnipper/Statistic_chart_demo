@@ -39,7 +39,7 @@ public class DrawThread extends Thread implements Drawable {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(0x88517da2);
         sizeRect = new SizeRect();
-        legend = new Legend();
+        legend = new Legend(sizeRect);
 
 
     }
@@ -100,6 +100,8 @@ public class DrawThread extends Thread implements Drawable {
 
 
         ArrayList<LineChart> lines = chart.getLines();
+        int widthLine = (int) (canvas.getWidth() * (canvas.getWidth()/sizeRect.getWidth()));
+        float xLine = -sizeRect.getX() * (widthLine / (float) canvas.getWidth());
 
         if(lines.size() > 0) {
             LineChart lineChart = lines.get(0);
@@ -107,11 +109,11 @@ public class DrawThread extends Thread implements Drawable {
             ChartPoint maxXY = lineChart.getMaxXY();
             legend.setMaxValueX(maxXY.getX());
             legend.setMaxValueY(maxXY.getY());
+            legend.setXLine(xLine);
+            legend.setWidthLine(widthLine);
         }
         legend.draw(canvas);
         for (LineChart line : lines) {
-            int widthLine = (int) (canvas.getWidth() * (canvas.getWidth()/sizeRect.getWidth()));
-            float xLine = -sizeRect.getX() * (widthLine / (float) canvas.getWidth());
             int height = canvas.getHeight() - BOTTOM_PADDING_CHART;
             // small bottom lines
             line.saveNormPoint();
