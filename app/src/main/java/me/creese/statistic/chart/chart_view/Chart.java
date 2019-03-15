@@ -57,6 +57,7 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
 
     public void addLine(LineChart lineChart) {
         lines.add(lineChart);
+        lineChart.setSizeRect(drawThread.getSizeRect());
     }
 
     public ArrayList<LineChart> getLines() {

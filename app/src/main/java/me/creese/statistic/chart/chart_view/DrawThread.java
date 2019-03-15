@@ -1,6 +1,5 @@
 package me.creese.statistic.chart.chart_view;
 
-import android.animation.ValueAnimator;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -14,9 +13,12 @@ import me.creese.statistic.chart.chart_view.impl.Drawable;
 public class DrawThread extends Thread implements Drawable {
     private static final long FRAME_TIME = 16_666_670; // ms ~ 60 fps
     private static final String TAG = DrawThread.class.getSimpleName();
+    public static final int BOTTOM_PADDING = 125;
+    public static final int BOTTOM_PADDING_CHART = 216;
     private final Chart chart;
     private final Paint paint;
     private final SizeRect sizeRect;
+    private final Legend legend;
 
     private long prevTime;
     private Matrix matrix;
@@ -37,6 +39,7 @@ public class DrawThread extends Thread implements Drawable {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(0x88517da2);
         sizeRect = new SizeRect();
+        legend = new Legend();
 
 
     }
@@ -97,20 +100,38 @@ public class DrawThread extends Thread implements Drawable {
 
 
         ArrayList<LineChart> lines = chart.getLines();
+
+        if(lines.size() > 0) {
+            LineChart lineChart = lines.get(0);
+            lineChart.setAutoRescale(true);
+            ChartPoint maxXY = lineChart.getMaxXY();
+            legend.setMaxValueX(maxXY.getX());
+            legend.setMaxValueY(maxXY.getY());
+        }
+        legend.draw(canvas);
         for (LineChart line : lines) {
             int widthLine = (int) (canvas.getWidth() * (canvas.getWidth()/sizeRect.getWidth()));
-
-            line.normPoints(widthLine,canvas.getHeight()-216);
-            line.getMatrix().setTranslate(-sizeRect.getX()*(widthLine/(float)canvas.getWidth()),0);
-            line.draw(canvas);
+            float xLine = -sizeRect.getX() * (widthLine / (float) canvas.getWidth());
+            int height = canvas.getHeight() - BOTTOM_PADDING_CHART;
             // small bottom lines
-            line.normPoints(canvas.getWidth(),112);
+            line.saveNormPoint();
+            line.setAutoRescale(false);
             line.getMatrix().setTranslate(0,canvas.getHeight()-120);
+            line.normPoints( canvas.getWidth(),112);
             line.draw(canvas);
+
+            line.restoreNormPoints();
+
+            line.setAutoRescale(true);
+            line.getMatrix().setTranslate(xLine,0);
+            line.normPoints(widthLine, height);
+            line.draw(canvas);
+
+
         }
 
-        canvas.drawRect(0,canvas.getHeight()-125,sizeRect.getX(),canvas.getHeight(),paint);
-        canvas.drawRect(sizeRect.getX()+sizeRect.getWidth(),canvas.getHeight()-125,canvas.getWidth(),canvas.getHeight(),paint);
+        canvas.drawRect(0,canvas.getHeight()-BOTTOM_PADDING,sizeRect.getX(),canvas.getHeight(),paint);
+        canvas.drawRect(sizeRect.getX()+sizeRect.getWidth(),canvas.getHeight()-BOTTOM_PADDING,canvas.getWidth(),canvas.getHeight(),paint);
 
         sizeRect.draw(canvas);
         //matrix.postTranslate(100 * delta, 0);

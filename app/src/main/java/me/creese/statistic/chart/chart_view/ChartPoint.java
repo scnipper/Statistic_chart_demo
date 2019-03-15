@@ -34,11 +34,6 @@ public class ChartPoint {
         this.y = y;
     }
 
-    @Override
-    public String toString() {
-        return "ChartPoint{" + "x=" + x + ", y=" + y + '}';
-    }
-
     public void setNormX(float normX) {
         this.normX = normX;
     }
@@ -53,5 +48,10 @@ public class ChartPoint {
 
     public float getNormY() {
         return normY;
+    }
+
+    @Override
+    public String toString() {
+        return "ChartPoint{" + "x=" + normX + ", y=" + normY + '}';
     }
 }
