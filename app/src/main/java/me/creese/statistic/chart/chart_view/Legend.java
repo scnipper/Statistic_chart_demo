@@ -15,6 +15,7 @@ public class Legend implements Drawable {
     private Paint paint;
     private float XLine;
     private float widthLine;
+    private float XVertLine;
 
 
     public Legend(SizeRect sizeRect) {
@@ -22,6 +23,7 @@ public class Legend implements Drawable {
         countPart = 6;
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setAntiAlias(true);
+        XVertLine = -1;
 
         paint.setStrokeWidth(2);
         paint.setColor(0xffe7e8e9);
@@ -58,6 +60,10 @@ public class Legend implements Drawable {
         this.widthLine = widthLine;
     }
 
+    public void setXVertLine(float xVertLine) {
+        this.XVertLine = xVertLine;
+    }
+
     @Override
     public void draw(Canvas canvas) {
         int height = canvas.getHeight() - DrawThread.BOTTOM_PADDING_CHART;
@@ -69,28 +75,32 @@ public class Legend implements Drawable {
         float countX = widthLine / partX;
 
 
+        // draw separate lines
         for (int i = 0; i < countPart; i++) {
             float startY = height-partHeight * i;
-
             int valueY = (int) (partY * i);
-
-
-
-
             canvas.drawText(String.valueOf(valueY),0,startY-15,textPaint);
-
             canvas.drawLine(0, startY,canvas.getWidth(),startY,paint);
 
-
         }
+
+        // vertical line
+
+        if(XVertLine != -1) {
+            canvas.drawLine(XVertLine,0,XVertLine,canvas.getHeight()-DrawThread.BOTTOM_PADDING_CHART,paint);
+        }
+
         for (int i = 0; i < countX; i++) {
             float startX = partWidth * i;
             int valueX = (int) (partX * i);
 
 
             float xText = startX + XLine;
-            if(xText > 50 && xText < canvas.getWidth()-100)
-            canvas.drawText(String.valueOf(valueX), xText,height+50,textPaint);
+            if(xText > 50 && xText < canvas.getWidth()-50) {
+                String text = String.valueOf(valueX);
+                float widthText = textPaint.measureText(text);
+                canvas.drawText(text, xText-widthText/2,height+50,textPaint);
+            }
         }
 
 

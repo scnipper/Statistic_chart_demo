@@ -17,15 +17,13 @@ import me.creese.statistic.chart.MainActivity;
 public class Chart extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = Chart.class.getSimpleName();
 
-    private float widthLineChart = 25;
-
     private DrawThread drawThread;
     private ArrayList<LineChart> lines;
     private boolean isHitInSizeRect;
     private float downX;
-    private float downY;
     private boolean isHitLeftLine;
     private boolean isHitRightLine;
+    private ChartPoint circlePoint;
 
     public Chart(Context context) {
         super(context);
@@ -77,10 +75,41 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                 isHitInSizeRect = false;
                 isHitRightLine = false;
                 isHitLeftLine = false;
-                Log.w(TAG, "onTouchEvent: touch up" );
                 break;
             case MotionEvent.ACTION_DOWN:
                 downX = event.getX()-sizeRect.getX();
+
+                float y = event.getY();
+                float x = event.getX();
+                ViewLegend viewLegend = drawThread.getViewLegend();
+                drawThread.getLegend().setXVertLine(-1);
+                viewLegend.setVisible(false);
+                if (circlePoint != null) {
+                    circlePoint.setDrawCircle(false);
+                    circlePoint = null;
+                }
+                if(y < getHeight()-DrawThread.BOTTOM_PADDING_CHART) {
+
+                    for (LineChart line : lines) {
+                        ArrayList<ChartPoint> points = line.getPoints();
+                        for (ChartPoint point : points) {
+                            float normX = point.getNormX()+line.getTranslateX();
+                            if(normX < getWidth()) {
+                                if(x > normX-30 && x < normX+30) {
+                                    point.setDrawCircle(true);
+                                    circlePoint = point;
+                                    drawThread.getLegend().setXVertLine(normX);
+                                    viewLegend.measureText();
+                                    viewLegend.setVisible(true);
+                                    viewLegend.setX(normX-70);
+                                    viewLegend.setY(100);
+                                    break;
+                                }
+                            } else break;
+                        }
+                    }
+                    break;
+                }
 
                 if (sizeRect.hit(event.getX(),event.getY())) {
                     isHitInSizeRect = true;
@@ -88,7 +117,6 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                     isHitLeftLine = true;
                 } else if(sizeRect.hitRightLine(event.getX(),event.getY())) {
                     isHitRightLine = true;
-
                 }
             case MotionEvent.ACTION_MOVE:
                 if(isHitInSizeRect) {
@@ -96,8 +124,6 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                 } else if(isHitRightLine) {
                     sizeRect.setWidth(event.getX()-sizeRect.getX());
                 } else if(isHitLeftLine) {
-
-
                     sizeRect.setLeft(event.getX());
                 }
                 break;

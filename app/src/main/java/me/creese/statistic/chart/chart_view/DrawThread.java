@@ -19,6 +19,7 @@ public class DrawThread extends Thread implements Drawable {
     private final Paint paint;
     private final SizeRect sizeRect;
     private final Legend legend;
+    private final ViewLegend viewLegend;
 
     private long prevTime;
     private Matrix matrix;
@@ -40,6 +41,7 @@ public class DrawThread extends Thread implements Drawable {
         paint.setColor(0x88517da2);
         sizeRect = new SizeRect();
         legend = new Legend(sizeRect);
+        viewLegend = new ViewLegend();
 
 
     }
@@ -58,6 +60,14 @@ public class DrawThread extends Thread implements Drawable {
 
     public float getDelta() {
         return delta;
+    }
+
+    public Legend getLegend() {
+        return legend;
+    }
+
+    public ViewLegend getViewLegend() {
+        return viewLegend;
     }
 
     @Override
@@ -116,6 +126,7 @@ public class DrawThread extends Thread implements Drawable {
         for (LineChart line : lines) {
             int height = canvas.getHeight() - BOTTOM_PADDING_CHART;
             // small bottom lines
+            line.setDrawPointCircle(false);
             line.saveNormPoint();
             line.setAutoRescale(false);
             line.getMatrix().setTranslate(0,canvas.getHeight()-120);
@@ -123,7 +134,7 @@ public class DrawThread extends Thread implements Drawable {
             line.draw(canvas);
 
             line.restoreNormPoints();
-
+            line.setDrawPointCircle(true);
             line.setAutoRescale(true);
             line.getMatrix().setTranslate(xLine,0);
             line.normPoints(widthLine, height);
@@ -136,6 +147,8 @@ public class DrawThread extends Thread implements Drawable {
         canvas.drawRect(sizeRect.getX()+sizeRect.getWidth(),canvas.getHeight()-BOTTOM_PADDING,canvas.getWidth(),canvas.getHeight(),paint);
 
         sizeRect.draw(canvas);
+
+        viewLegend.draw(canvas);
         //matrix.postTranslate(100 * delta, 0);
 
 

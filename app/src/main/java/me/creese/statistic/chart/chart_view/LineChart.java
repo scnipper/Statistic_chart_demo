@@ -14,6 +14,7 @@ import me.creese.statistic.chart.chart_view.impl.Drawable;
 public class LineChart implements Drawable {
     private static final String TAG = LineChart.class.getSimpleName();
     private final Paint paint;
+    private final Paint dotPaint;
     private ArrayList<ChartPoint> points;
     private Path linePath;
     private Matrix matrix;
@@ -24,6 +25,7 @@ public class LineChart implements Drawable {
     private boolean isAutoRescale;
     private boolean isVisible;
     private float[] tmpNormPoints;
+    private boolean isDrawPointCircle;
 
 
     public LineChart() {
@@ -34,10 +36,17 @@ public class LineChart implements Drawable {
         linePath = new Path();
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         setWidthLineChart(5);
-        setColorLine(Color.RED);
+        paint.setStyle(Paint.Style.STROKE);
         paint.setAntiAlias(true);
         tmpValues = new float[9];
-        paint.setStyle(Paint.Style.STROKE);
+
+        dotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        dotPaint.setAntiAlias(true);
+        dotPaint.setStyle(Paint.Style.FILL);
+        dotPaint.setStrokeWidth(6);
+        dotPaint.setColor(Color.WHITE);
+        setColorLine(Color.RED);
+
         isVisible = true;
     }
 
@@ -82,9 +91,8 @@ public class LineChart implements Drawable {
             if (point.getX() > max.getX()) max.setX(point.getX());
             if(isNormPoints && isAutoRescale) {
 
-                matrix.getValues(tmpValues);
 
-                float transX = tmpValues[Matrix.MTRANS_X];
+                float transX = getTranslateX();
 
                 float _x = point.getNormX() + transX;
                 if(_x > canvasWidth) continue;
@@ -113,6 +121,10 @@ public class LineChart implements Drawable {
             tmpNormPoints[i+1] = point.getNormY();
         }
     }
+    public float getTranslateX() {
+        matrix.getValues(tmpValues);
+        return tmpValues[Matrix.MTRANS_X];
+    }
 
     public void setSizeRect(SizeRect sizeRect) {
         this.sizeRect = sizeRect;
@@ -128,6 +140,14 @@ public class LineChart implements Drawable {
 
     public boolean isVisible() {
         return isVisible;
+    }
+
+    public ArrayList<ChartPoint> getPoints() {
+        return points;
+    }
+
+    public void setDrawPointCircle(boolean drawPointCircle) {
+        isDrawPointCircle = drawPointCircle;
     }
 
     @Override
@@ -148,9 +168,22 @@ public class LineChart implements Drawable {
             linePath.lineTo(point.getNormX(), point.getNormY());
 
 
+
+
         }
         linePath.transform(matrix);
         canvas.drawPath(linePath, paint);
+        if(isDrawPointCircle) {
+
+            float translateX = getTranslateX();
+            for (ChartPoint point : points) {
+                if (point.isDrawCircle()) {
+                    canvas.drawCircle(point.getNormX()+translateX, point.getNormY(), 15, dotPaint);
+                    canvas.drawCircle(point.getNormX()+translateX, point.getNormY(), 15, paint);
+                }
+            }
+        }
+
 
     }
 }

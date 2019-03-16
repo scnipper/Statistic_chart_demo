@@ -5,6 +5,7 @@ public class ChartPoint {
     private float y;
     private float normX;
     private float normY;
+    private boolean drawCircle;
 
 
     public ChartPoint() {
@@ -20,6 +21,14 @@ public class ChartPoint {
 
     public float getX() {
         return x;
+    }
+
+    public boolean isDrawCircle() {
+        return drawCircle;
+    }
+
+    public void setDrawCircle(boolean drawCircle) {
+        this.drawCircle = drawCircle;
     }
 
     public void setX(float x) {
