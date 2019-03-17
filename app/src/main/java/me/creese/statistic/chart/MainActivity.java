@@ -8,31 +8,39 @@ import android.view.Display;
 
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.Random;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import me.creese.statistic.chart.chart_view.Chart;
 import me.creese.statistic.chart.chart_view.ChartPoint;
 import me.creese.statistic.chart.chart_view.LineChart;
+import me.creese.statistic.chart.chart_view.impl.LineFormatter;
 import me.creese.statistic.chart.jsonget.JsonArray;
 import me.creese.statistic.chart.jsonget.JsonEntity;
 import me.creese.statistic.chart.jsonget.JsonG;
 import me.creese.statistic.chart.jsonget.JsonGExeption;
 import me.creese.statistic.chart.jsonget.JsonObject;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LineFormatter {
 
     public static float HEIGHT_SCREEN;
+    private Chart chart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         HEIGHT_SCREEN = size.y;
 
+
+        chart = findViewById(R.id.stat_chart);
+        chart.setLineFormatter(this);
         try {
             DataInputStream stream = new DataInputStream(getResources().getAssets().open("chart_data.json"));
 
@@ -75,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void makeCharts(JsonEntity generateRoot) {
-        final Chart chart = findViewById(R.id.stat_chart);
 
 
         JsonArray rootArray = generateRoot.getAsArray();
@@ -95,15 +102,13 @@ public class MainActivity extends AppCompatActivity {
                 JsonEntity typeVal = types.get(type);
 
 
-
-
                 String typeValString = typeVal.getAsString();
                 switch (typeValString) {
                     case "line":
                         LineChart lineChart = new LineChart();
 
                         for (int k = 1; k < p.getArray().size(); k++) {
-                            lineChart.addPoint(new ChartPoint(valuesX[k-1],p.get(k).getAsFloat()));
+                            lineChart.addPoint(new ChartPoint(valuesX[k - 1], p.get(k).getAsFloat()));
                         }
 
                         lineChart.setName(names.get(type).getAsString());
@@ -113,21 +118,32 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case "x":
 
-                        valuesX = new long[p.size()-1];
+                        valuesX = new long[p.size() - 1];
 
-                        for (int k = 1; k < valuesX.length; k++) {
-                            valuesX[k-1] = p.get(k).getAsLong();
+                        for (int k = 1; k < p.size(); k++) {
+
+                            valuesX[k - 1] = p.get(k).getAsLong();
                         }
 
                         break;
-                        default:
-                            throw new JsonGExeption("Wrong type value \""+typeValString+"\"");
+                    default:
+                        throw new JsonGExeption("Wrong type value \"" + typeValString + "\"");
                 }
             }
 
         }
 
 
+    }
 
+    @Override
+    public String getFormatX(float rawX) {
+        SimpleDateFormat format = new SimpleDateFormat("EEE, MMM d", Locale.US);
+        return format.format(new Date((long) rawX));
+    }
+
+    @Override
+    public String getFormatY(float rawY) {
+        return String.valueOf((int)rawY);
     }
 }

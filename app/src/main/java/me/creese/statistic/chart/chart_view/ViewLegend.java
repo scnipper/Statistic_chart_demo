@@ -125,9 +125,9 @@ public class ViewLegend implements Drawable {
 
     @Override
     public void draw(Canvas canvas) {
+        canvasWidth = canvas.getWidth();
         if (!isVisible) return;
 
-        canvasWidth = canvas.getWidth();
         paint.setColor(Color.WHITE);
         paint.setStyle(Paint.Style.FILL);
 

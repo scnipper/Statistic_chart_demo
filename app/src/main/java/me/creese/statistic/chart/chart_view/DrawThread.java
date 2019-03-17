@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import me.creese.statistic.chart.chart_view.impl.Drawable;
 
 public class DrawThread extends Thread implements Drawable {
-    private static final long FRAME_TIME = 16_666_670; // ms ~ 60 fps
-    private static final String TAG = DrawThread.class.getSimpleName();
     public static final int BOTTOM_PADDING = 125;
     public static final int BOTTOM_PADDING_CHART = 216;
+    private static final long FRAME_TIME = 16_666_670; // nano ~ 60 fps
+    private static final String TAG = DrawThread.class.getSimpleName();
     private final Chart chart;
     private final Paint paint;
     private final SizeRect sizeRect;
@@ -40,9 +40,26 @@ public class DrawThread extends Thread implements Drawable {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(0x88517da2);
         sizeRect = new SizeRect();
-        legend = new Legend(sizeRect);
+        legend = new Legend(chart.getLineFormatter());
         viewLegend = new ViewLegend();
 
+
+    }
+
+    public ChartPoint getMaxValueLines(boolean isRescale) {
+        float maxX = 0;
+        float maxY = 0;
+
+        for (LineChart line : chart.getLines()) {
+            if(line.isVisible()) {
+                line.setAutoRescale(isRescale);
+                ChartPoint maxXY = line.getMaxXY();
+
+                if (maxXY.getX() > maxX) maxX = maxXY.getX();
+                if (maxXY.getY() > maxY) maxY = maxXY.getY();
+            }
+        }
+        return new ChartPoint(maxX, maxY);
 
     }
 
@@ -72,7 +89,6 @@ public class DrawThread extends Thread implements Drawable {
 
     @Override
     public void run() {
-        Canvas canvas;
         while (running) {
             if (pause) continue;
 
@@ -84,7 +100,7 @@ public class DrawThread extends Thread implements Drawable {
             prevTime = time;
 
             SurfaceHolder holder = chart.getHolder();
-            canvas = holder.lockCanvas();
+            Canvas canvas = holder.lockCanvas();
             if (canvas != null) {
                 synchronized (chart) {
                     delta = elapsed / 1000_000_000.f;
@@ -106,45 +122,44 @@ public class DrawThread extends Thread implements Drawable {
         Paint text = new Paint();
         text.setTextSize(50);
         text.setColor(Color.BLACK);
-        canvas.drawText((int) (1/delta)+" fps",0,60,text);
+        canvas.drawText((int) (1 / delta) + " fps", 0, 60, text);
 
 
         ArrayList<LineChart> lines = chart.getLines();
-        int widthLine = (int) (canvas.getWidth() * (canvas.getWidth()/sizeRect.getWidth()));
+        int widthLine = (int) (canvas.getWidth() * (canvas.getWidth() / sizeRect.getWidth()));
         float xLine = -sizeRect.getX() * (widthLine / (float) canvas.getWidth());
 
-        if(lines.size() > 0) {
-            LineChart lineChart = lines.get(0);
-            lineChart.setAutoRescale(true);
-            ChartPoint maxXY = lineChart.getMaxXY();
-            legend.setMaxValueX(maxXY.getX());
-            legend.setMaxValueY(maxXY.getY());
-            legend.setXLine(xLine);
-            legend.setWidthLine(widthLine);
-        }
+
+        ChartPoint maxXY = getMaxValueLines(true);
+        ChartPoint maxXYNotRescale = getMaxValueLines(false);
+        legend.setMaxValueX(maxXY.getX());
+        legend.setMaxValueY(maxXY.getY());
+        legend.setXLine(xLine);
+        legend.setWidthLine(widthLine);
+
         legend.draw(canvas);
         for (LineChart line : lines) {
             int height = canvas.getHeight() - BOTTOM_PADDING_CHART;
             // small bottom lines
             line.setDrawPointCircle(false);
             line.saveNormPoint();
-            line.setAutoRescale(false);
-            line.getMatrix().setTranslate(0,canvas.getHeight()-120);
-            line.normPoints( canvas.getWidth(),112);
+            //line.setAutoRescale(false);
+            line.getMatrix().setTranslate(0, canvas.getHeight() - 120);
+            line.normPoints(canvas.getWidth(), 112,maxXYNotRescale);
             line.draw(canvas);
 
             line.restoreNormPoints();
             line.setDrawPointCircle(true);
-            line.setAutoRescale(true);
-            line.getMatrix().setTranslate(xLine,0);
-            line.normPoints(widthLine, height);
+            //line.setAutoRescale(true);
+            line.getMatrix().setTranslate(xLine, 0);
+            line.normPoints(widthLine, height, maxXY);
             line.draw(canvas);
 
 
         }
 
-        canvas.drawRect(0,canvas.getHeight()-BOTTOM_PADDING,sizeRect.getX(),canvas.getHeight(),paint);
-        canvas.drawRect(sizeRect.getX()+sizeRect.getWidth(),canvas.getHeight()-BOTTOM_PADDING,canvas.getWidth(),canvas.getHeight(),paint);
+        canvas.drawRect(0, canvas.getHeight() - BOTTOM_PADDING, sizeRect.getX(), canvas.getHeight(), paint);
+        canvas.drawRect(sizeRect.getX() + sizeRect.getWidth(), canvas.getHeight() - BOTTOM_PADDING, canvas.getWidth(), canvas.getHeight(), paint);
 
         sizeRect.draw(canvas);
 

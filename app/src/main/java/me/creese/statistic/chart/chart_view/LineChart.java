@@ -71,18 +71,15 @@ public class LineChart implements Drawable {
         return matrix;
     }
 
-    public void normPoints(int width, int height) {
+    public void normPoints(int width, int height, ChartPoint max) {
 
-
-        ChartPoint max = getMaxXY();
-        float firstX = points.get(0).getX();
         float normX = (width) / max.getX();
 
         float normY = height / max.getY();
 
 
         for (ChartPoint point : points) {
-            point.setNormX((point.getX() - firstX) * normX);
+            point.setNormX(point.getX() * normX);
             point.setNormY(height - point.getY() * normY);
         }
         isNormPoints = true;
@@ -180,8 +177,6 @@ public class LineChart implements Drawable {
         if (!isVisible) return;
 
         canvasWidth = canvas.getWidth();
-
-        //Log.w(TAG, "draw: " + points.get(1).getNormX() + " " + canvasWidth);
 
         linePath.reset();
         for (int i = 1; i < points.size(); i++) {
