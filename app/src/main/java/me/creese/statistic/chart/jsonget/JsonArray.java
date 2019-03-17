@@ -14,6 +14,11 @@ public class JsonArray extends JsonEntity {
     public JsonEntity get(int index) {
         return array.get(index);
     }
+
+    public ArrayList<JsonEntity> getArray() {
+        return array;
+    }
+
     public void add(JsonEntity jsonEntity) {
         array.add(jsonEntity);
     }

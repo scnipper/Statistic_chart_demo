@@ -172,7 +172,7 @@ public class ViewLegend implements Drawable {
 
     }
 
-    public class DataView {
+    public static class DataView {
         public String name;
         public String value;
         public int color;

@@ -5,7 +5,6 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -55,7 +54,6 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
 
     public void addLine(LineChart lineChart) {
         lines.add(lineChart);
-        lineChart.setSizeRect(drawThread.getSizeRect());
     }
 
     public ArrayList<LineChart> getLines() {
@@ -77,53 +75,63 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                 isHitLeftLine = false;
                 break;
             case MotionEvent.ACTION_DOWN:
-                downX = event.getX()-sizeRect.getX();
+                downX = event.getX() - sizeRect.getX();
 
                 float y = event.getY();
                 float x = event.getX();
                 ViewLegend viewLegend = drawThread.getViewLegend();
                 drawThread.getLegend().setXVertLine(-1);
                 viewLegend.setVisible(false);
+                viewLegend.getDataViews().clear();
                 if (circlePoint != null) {
                     circlePoint.setDrawCircle(false);
                     circlePoint = null;
                 }
-                if(y < getHeight()-DrawThread.BOTTOM_PADDING_CHART) {
+                if (y < getHeight() - DrawThread.BOTTOM_PADDING_CHART) {
 
                     for (LineChart line : lines) {
                         ArrayList<ChartPoint> points = line.getPoints();
                         for (ChartPoint point : points) {
-                            float normX = point.getNormX()+line.getTranslateX();
-                            if(normX < getWidth()) {
-                                if(x > normX-30 && x < normX+30) {
+                            float normX = point.getNormX() + line.getTranslateX();
+                            if (normX < getWidth()) {
+                                if (x > normX - 30 && x < normX + 30) {
                                     point.setDrawCircle(true);
                                     circlePoint = point;
-                                    drawThread.getLegend().setXVertLine(normX);
-                                    viewLegend.measureText();
-                                    viewLegend.setVisible(true);
-                                    viewLegend.setX(normX-70);
+                                    drawThread.getLegend().setXVertLine( normX);
+
+                                    viewLegend.setHeadText(point.getX()+"");
+                                    viewLegend.addDataView(new ViewLegend.DataView(line.getName(),point.getY()+"",line.getColor()));
+
+
+                                    viewLegend.setX(normX - 70);
                                     viewLegend.setY(100);
                                     break;
                                 }
                             } else break;
                         }
                     }
+
+                    if(viewLegend.getDataViews().size() > 0) {
+                        viewLegend.measureText();
+                        viewLegend.setVisible(true);
+                    }
+
                     break;
                 }
 
-                if (sizeRect.hit(event.getX(),event.getY())) {
+                if (sizeRect.hit(event.getX(), event.getY())) {
                     isHitInSizeRect = true;
-                } else if(sizeRect.hitLeftLine(event.getX(),event.getY())) {
+                } else if (sizeRect.hitLeftLine(event.getX(), event.getY())) {
                     isHitLeftLine = true;
-                } else if(sizeRect.hitRightLine(event.getX(),event.getY())) {
+                } else if (sizeRect.hitRightLine(event.getX(), event.getY())) {
                     isHitRightLine = true;
                 }
             case MotionEvent.ACTION_MOVE:
-                if(isHitInSizeRect) {
-                    sizeRect.setX(event.getX()-downX);
-                } else if(isHitRightLine) {
-                    sizeRect.setWidth(event.getX()-sizeRect.getX());
-                } else if(isHitLeftLine) {
+                if (isHitInSizeRect) {
+                    sizeRect.setX(event.getX() - downX);
+                } else if (isHitRightLine) {
+                    sizeRect.setWidth(event.getX() - sizeRect.getX());
+                } else if (isHitLeftLine) {
                     sizeRect.setLeft(event.getX());
                 }
                 break;

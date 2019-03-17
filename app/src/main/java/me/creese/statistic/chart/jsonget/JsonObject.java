@@ -12,6 +12,11 @@ public class JsonObject extends JsonEntity {
         fields = new LinkedHashMap<>();
     }
 
+    public JsonEntity get(String nameField) {
+        JsonEntity jsonEntity = fields.get(nameField);
+        if(jsonEntity == null) throw new JsonGExeption("Dont find field \""+nameField+"\"");
+        return jsonEntity;
+    }
     public void addField(String name,JsonEntity value) {
         fields.put(name,value);
     }

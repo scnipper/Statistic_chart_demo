@@ -61,6 +61,6 @@ public class ChartPoint {
 
     @Override
     public String toString() {
-        return "ChartPoint{" + "x=" + normX + ", y=" + normY + '}';
+        return "ChartPoint{" + "x=" + x + ", y=" + y + '}';
     }
 }

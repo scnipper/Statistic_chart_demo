@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -18,7 +17,6 @@ public class LineChart implements Drawable {
     private ArrayList<ChartPoint> points;
     private Path linePath;
     private Matrix matrix;
-    private SizeRect sizeRect;
     private int canvasWidth;
     private boolean isNormPoints;
     private float[] tmpValues;
@@ -26,6 +24,8 @@ public class LineChart implements Drawable {
     private boolean isVisible;
     private float[] tmpNormPoints;
     private boolean isDrawPointCircle;
+    private float offsetX;
+    private String name;
 
 
     public LineChart() {
@@ -59,6 +59,10 @@ public class LineChart implements Drawable {
     }
 
     public void addPoint(ChartPoint point) {
+        if (points.size() == 0) {
+            offsetX = point.getX();
+        }
+        point.setX(point.getX() - offsetX);
         points.add(point);
 
     }
@@ -71,12 +75,14 @@ public class LineChart implements Drawable {
 
 
         ChartPoint max = getMaxXY();
-        float normX = width / max.getX();
+        float firstX = points.get(0).getX();
+        float normX = (width) / max.getX();
 
         float normY = height / max.getY();
 
+
         for (ChartPoint point : points) {
-            point.setNormX(point.getX() * normX);
+            point.setNormX((point.getX() - firstX) * normX);
             point.setNormY(height - point.getY() * normY);
         }
         isNormPoints = true;
@@ -89,13 +95,13 @@ public class LineChart implements Drawable {
 
 
             if (point.getX() > max.getX()) max.setX(point.getX());
-            if(isNormPoints && isAutoRescale) {
+            if (isNormPoints && isAutoRescale) {
 
 
                 float transX = getTranslateX();
 
                 float _x = point.getNormX() + transX;
-                if(_x > canvasWidth) continue;
+                if (_x > canvasWidth || _x < 0) continue;
             }
             if (point.getY() > max.getY()) max.setY(point.getY());
         }
@@ -107,9 +113,10 @@ public class LineChart implements Drawable {
             ChartPoint point = points.get(i);
 
             point.setNormX(tmpNormPoints[i]);
-            point.setNormY(tmpNormPoints[i+1]);
+            point.setNormY(tmpNormPoints[i + 1]);
         }
     }
+
     public void saveNormPoint() {
         if (tmpNormPoints == null) {
             tmpNormPoints = new float[points.size() * 2];
@@ -118,28 +125,25 @@ public class LineChart implements Drawable {
         for (int i = 0; i < points.size(); i++) {
             ChartPoint point = points.get(i);
             tmpNormPoints[i] = point.getNormX();
-            tmpNormPoints[i+1] = point.getNormY();
+            tmpNormPoints[i + 1] = point.getNormY();
         }
     }
+
     public float getTranslateX() {
         matrix.getValues(tmpValues);
         return tmpValues[Matrix.MTRANS_X];
-    }
-
-    public void setSizeRect(SizeRect sizeRect) {
-        this.sizeRect = sizeRect;
     }
 
     public void setAutoRescale(boolean autoRescale) {
         isAutoRescale = autoRescale;
     }
 
-    public void setVisible(boolean visible) {
-        isVisible = visible;
-    }
-
     public boolean isVisible() {
         return isVisible;
+    }
+
+    public void setVisible(boolean visible) {
+        isVisible = visible;
     }
 
     public ArrayList<ChartPoint> getPoints() {
@@ -150,10 +154,30 @@ public class LineChart implements Drawable {
         isDrawPointCircle = drawPointCircle;
     }
 
+    public float getOffsetX() {
+        return offsetX;
+    }
+
+    public void setOffsetX(float offsetX) {
+        this.offsetX = offsetX;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getColor() {
+        return paint.getColor();
+    }
+
     @Override
     public void draw(Canvas canvas) {
 
-        if(!isVisible) return;
+        if (!isVisible) return;
 
         canvasWidth = canvas.getWidth();
 
@@ -168,18 +192,16 @@ public class LineChart implements Drawable {
             linePath.lineTo(point.getNormX(), point.getNormY());
 
 
-
-
         }
         linePath.transform(matrix);
         canvas.drawPath(linePath, paint);
-        if(isDrawPointCircle) {
+        if (isDrawPointCircle) {
 
             float translateX = getTranslateX();
             for (ChartPoint point : points) {
                 if (point.isDrawCircle()) {
-                    canvas.drawCircle(point.getNormX()+translateX, point.getNormY(), 15, dotPaint);
-                    canvas.drawCircle(point.getNormX()+translateX, point.getNormY(), 15, paint);
+                    canvas.drawCircle(point.getNormX() + translateX, point.getNormY(), 15, dotPaint);
+                    canvas.drawCircle(point.getNormX() + translateX, point.getNormY(), 15, paint);
                 }
             }
         }

@@ -14,6 +14,9 @@ public class JsonEntity {
     public float getAsFloat() {
         return Float.valueOf(value);
     }
+    public long getAsLong() {
+        return Long.valueOf(value);
+    }
     public String getAsString() {
         return value;
     }

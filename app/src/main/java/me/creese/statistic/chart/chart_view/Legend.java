@@ -16,11 +16,14 @@ public class Legend implements Drawable {
     private float XLine;
     private float widthLine;
     private float XVertLine;
+    private int countTmp;
+    private float partWidth;
 
 
     public Legend(SizeRect sizeRect) {
         this.sizeRect = sizeRect;
-        countPart = 6;
+        countPart = 7;
+        countTmp = 7;
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setAntiAlias(true);
         XVertLine = -1;
@@ -32,6 +35,7 @@ public class Legend implements Drawable {
         textPaint.setAntiAlias(true);
         textPaint.setColor(0xff96a2aa);
         textPaint.setTextSize(40);
+
     }
 
     public int getCountPart() {
@@ -39,7 +43,9 @@ public class Legend implements Drawable {
     }
 
     public void setCountPart(int countPart) {
-        this.countPart = countPart;
+        this.countPart = countPart+1;
+        countTmp = countPart+1;
+
     }
 
     public void setMaxValueX(float maxValueX) {
@@ -68,15 +74,16 @@ public class Legend implements Drawable {
     public void draw(Canvas canvas) {
         int height = canvas.getHeight() - DrawThread.BOTTOM_PADDING_CHART;
 
-        float partHeight = height / (float)countPart;
-        float partWidth = canvas.getWidth() /(float) countPart;
-        float partY = maxValueY / countPart;
-        float partX = ((maxValueX* (sizeRect.getWidth()/canvas.getWidth())) / countPart);
-        float countX = widthLine / partX;
+        float partHeight = height / (float)(countPart-1);
 
+        if(partWidth == 0) {
+            partWidth = canvas.getWidth() / (float)countTmp;
+        }
 
+        float partY = maxValueY / (countPart-1);
+        textPaint.setTextAlign(Paint.Align.LEFT);
         // draw separate lines
-        for (int i = 0; i < countPart; i++) {
+        for (int i = 0; i < countPart-1; i++) {
             float startY = height-partHeight * i;
             int valueY = (int) (partY * i);
             canvas.drawText(String.valueOf(valueY),0,startY-15,textPaint);
@@ -90,17 +97,22 @@ public class Legend implements Drawable {
             canvas.drawLine(XVertLine,0,XVertLine,canvas.getHeight()-DrawThread.BOTTOM_PADDING_CHART,paint);
         }
 
-        for (int i = 0; i < countX; i++) {
-            float startX = partWidth * i;
-            int valueX = (int) (partX * i);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        float bX = 0;
+        float count = widthLine / (float)countTmp;
 
 
-            float xText = startX + XLine;
-            if(xText > 50 && xText < canvas.getWidth()-50) {
-                String text = String.valueOf(valueX);
-                float widthText = textPaint.measureText(text);
-                canvas.drawText(text, xText-widthText/2,height+50,textPaint);
-            }
+        if(count > partWidth*2f) countTmp *=2;
+
+        if(count < partWidth) countTmp/=2;
+
+        for (int i = 0; i < countTmp; i++) {
+
+            float p = bX / widthLine;
+
+            String text = String.valueOf(((int) (p * maxValueX)));
+            canvas.drawText(text, bX+XLine,height+50,textPaint);
+            bX+=count;
         }
 
 
