@@ -87,6 +87,7 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                 isHitLeftLine = false;
                 break;
             case MotionEvent.ACTION_DOWN:
+                drawThread.requestRender();
                 downX = event.getX() - sizeRect.getX();
 
                 float y = event.getY();
@@ -152,6 +153,7 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                     isHitRightLine = true;
                 }
             case MotionEvent.ACTION_MOVE:
+                drawThread.requestRender();
                 if (isHitInSizeRect) {
                     sizeRect.setX(event.getX() - downX);
                 } else if (isHitRightLine) {

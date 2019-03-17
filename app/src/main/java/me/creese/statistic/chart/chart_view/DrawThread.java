@@ -13,6 +13,7 @@ import me.creese.statistic.chart.chart_view.impl.Drawable;
 public class DrawThread extends Thread implements Drawable {
     public static final int BOTTOM_PADDING = 125;
     public static final int BOTTOM_PADDING_CHART = 216;
+    public static final int FRAME_TO_PAUSE_RENDER = 60;
     private static final long FRAME_TIME = 16_666_670; // nano ~ 60 fps
     private static final String TAG = DrawThread.class.getSimpleName();
     private final Chart chart;
@@ -26,6 +27,7 @@ public class DrawThread extends Thread implements Drawable {
     private boolean running;
     private boolean pause;
     private float delta;
+    private int frameToPause;
 
     public DrawThread(Chart chart) {
         this.chart = chart;
@@ -61,6 +63,10 @@ public class DrawThread extends Thread implements Drawable {
         }
         return new ChartPoint(maxX, maxY);
 
+    }
+    public void requestRender() {
+        pause = false;
+        frameToPause = 0;
     }
 
     public void setRunning(boolean running) {
@@ -108,7 +114,12 @@ public class DrawThread extends Thread implements Drawable {
                 }
 
                 holder.unlockCanvasAndPost(canvas);
+
+                frameToPause++;
+
+                if(frameToPause >= FRAME_TO_PAUSE_RENDER) pause = true;
             }
+
 
 
         }

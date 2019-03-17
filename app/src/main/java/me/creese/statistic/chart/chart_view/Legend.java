@@ -19,6 +19,7 @@ public class Legend implements Drawable {
     private float XVertLine;
     private int countTmp;
     private float partWidth;
+    private float apendPartWidth;
 
 
     public Legend(LineFormatter lineFormatter) {
@@ -109,10 +110,9 @@ public class Legend implements Drawable {
         float w = widthLine / (float) countTmp;
 
 
-        if (w > this.partWidth * 2f) countTmp *= 2;
+        if (w > (this.partWidth+apendPartWidth) * 2f) countTmp *= 2;
 
-        if (w < this.partWidth) countTmp /= 2;
-
+        if (w < (this.partWidth + apendPartWidth)) countTmp /= 2;
 
 
         for (int i = 0; i < countTmp; i++) {
@@ -127,7 +127,11 @@ public class Legend implements Drawable {
                 text = String.valueOf(((long) (perc * maxValueX)));
             }
 
-                canvas.drawText(text, xText, height + 50, textPaint);
+            float measureText = textPaint.measureText(text)/4;
+
+            if(measureText > apendPartWidth) apendPartWidth = measureText;
+
+            canvas.drawText(text, xText, height + 50, textPaint);
 
             bX += w;
         }
