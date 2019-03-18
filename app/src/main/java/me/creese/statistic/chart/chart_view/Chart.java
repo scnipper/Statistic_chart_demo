@@ -72,6 +72,10 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
         return lineFormatter;
     }
 
+    public DrawThread getDrawThread() {
+        return drawThread;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
@@ -110,7 +114,7 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                         for (ChartPoint point : points) {
                             normX = point.getNormX() + line.getTranslateX();
                             if (normX < getWidth()) {
-                                if (x > normX - 30 && x < normX + 30) {
+                                if (x > normX - 30 && x < normX + 30 && line.isVisible()) {
                                     point.setDrawCircle(true);
                                     circlePoints.add(point);
                                     drawThread.getLegend().setXVertLine( normX);

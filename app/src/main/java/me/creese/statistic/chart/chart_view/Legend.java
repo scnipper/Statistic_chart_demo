@@ -75,16 +75,16 @@ public class Legend implements Drawable {
     public void draw(Canvas canvas) {
         int height = canvas.getHeight() - DrawThread.BOTTOM_PADDING_CHART;
 
-        float partHeight = height / (float) (countPart - 1);
+        float partHeight = height / (float) (countPart);
 
         if (partWidth == 0) {
             partWidth = canvas.getWidth() / (float) countTmp;
         }
 
-        float partY = maxValueY / (countPart - 1);
+        float partY = maxValueY / (countPart);
         textPaint.setTextAlign(Paint.Align.LEFT);
         // draw separate lines
-        for (int i = 0; i < countPart - 1; i++) {
+        for (int i = 0; i < countPart; i++) {
             float startY = height - partHeight * i;
             int valueY = (int) (partY * i);
             String text = "";

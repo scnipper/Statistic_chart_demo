@@ -1,14 +1,29 @@
 package me.creese.statistic.chart;
 
+import android.annotation.SuppressLint;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatCheckBox;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Display;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
@@ -22,10 +37,12 @@ import me.creese.statistic.chart.jsonget.JsonG;
 import me.creese.statistic.chart.jsonget.JsonGExeption;
 import me.creese.statistic.chart.jsonget.JsonObject;
 
-public class MainActivity extends AppCompatActivity implements LineFormatter {
+public class MainActivity extends AppCompatActivity implements LineFormatter, CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     public static float HEIGHT_SCREEN;
     private Chart chart;
+    private JsonEntity generateRoot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +56,14 @@ public class MainActivity extends AppCompatActivity implements LineFormatter {
         HEIGHT_SCREEN = size.y;
 
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+
+
         chart = findViewById(R.id.stat_chart);
         chart.setLineFormatter(this);
+
         try {
             DataInputStream stream = new DataInputStream(getResources().getAssets().open("chart_data.json"));
 
@@ -51,7 +74,8 @@ public class MainActivity extends AppCompatActivity implements LineFormatter {
 
             JsonG jsonG = new JsonG();
 
-            makeCharts(jsonG.generateRoot(fullJson));
+            generateRoot = jsonG.generateRoot(fullJson);
+            //makeCharts(0);
 
 
         } catch (IOException e) {
@@ -61,77 +85,102 @@ public class MainActivity extends AppCompatActivity implements LineFormatter {
 
 
 
-        /*LineChart lineChart = new LineChart();
-        lineChart.setName("hi");
-        lineChart.addPoint(new ChartPoint(0,150));
-        lineChart.addPoint(new ChartPoint(100,230));
-        lineChart.addPoint(new ChartPoint(160,0));
-        lineChart.addPoint(new ChartPoint(200,170));
-        lineChart.addPoint(new ChartPoint(260,200));
-        lineChart.addPoint(new ChartPoint(360,2000));
-        lineChart.addPoint(new ChartPoint(500,150));
-        lineChart.addPoint(new ChartPoint(560,1500));
-        lineChart.addPoint(new ChartPoint(660,2000));
-        lineChart.addPoint(new ChartPoint(730,900));
-        lineChart.addPoint(new ChartPoint(800,300));
-        lineChart.addPoint(new ChartPoint(960,1800));
-        lineChart.addPoint(new ChartPoint(1160,250));
-        lineChart.setColorLine(Color.BLACK);
-        chart.addLine(lineChart);*/
+
+        Spinner spinner = findViewById(R.id.spinner);
+
+        spinner.setOnItemSelectedListener(this);
+        ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_text);
+        spinner.setAdapter(stringArrayAdapter);
+        int sizeCharts = generateRoot.getAsArray().size();
+
+        for (int i = 0; i < sizeCharts; i++) {
+            stringArrayAdapter.add("Chart #" + (i + 1));
+        }
 
 
     }
 
-    private void makeCharts(JsonEntity generateRoot) {
+    @SuppressLint("RestrictedApi")
+    private void addCheckBox() {
+        ArrayList<LineChart> lines = chart.getLines();
 
+        LinearLayout container = findViewById(R.id.check_container);
+        for (int i = 0; i < lines.size(); i++) {
+            LineChart line = lines.get(i);
+            AppCompatCheckBox checkBox = new AppCompatCheckBox(new ContextThemeWrapper(this, R.style.CheckBoxStyle), null, 0);
 
-        JsonArray rootArray = generateRoot.getAsArray();
-        for (int i = 0; i < 1; i++) {
-            JsonObject obj = rootArray.get(i).getAsObject();
-            JsonArray columns = obj.get("columns").getAsArray();
-            JsonObject types = obj.get("types").getAsObject();
-            JsonObject names = obj.get("names").getAsObject();
-            JsonObject colors = obj.get("colors").getAsObject();
+            ColorStateList colorStateList = new ColorStateList(new int[][]{new int[]{-android.R.attr.state_checked}, new int[]{android.R.attr.state_checked}}, new int[]{line.getColor(), line.getColor()});
+            checkBox.setSupportButtonTintList(colorStateList);
+            checkBox.setText(line.getName());
+            container.addView(checkBox);
 
-            long valuesX[] = new long[0];
-            for (int j = 0; j < columns.getArray().size(); j++) {
-                JsonArray p = columns.get(j).getAsArray();
+            checkBox.setTag(i);
+            checkBox.setOnCheckedChangeListener(this);
 
-                String type = p.get(0).getAsString();
-
-                JsonEntity typeVal = types.get(type);
-
-
-                String typeValString = typeVal.getAsString();
-                switch (typeValString) {
-                    case "line":
-                        LineChart lineChart = new LineChart();
-
-                        for (int k = 1; k < p.getArray().size(); k++) {
-                            lineChart.addPoint(new ChartPoint(valuesX[k - 1], p.get(k).getAsFloat()));
-                        }
-
-                        lineChart.setName(names.get(type).getAsString());
-                        lineChart.setColorLine(Color.parseColor(colors.get(type).getAsString()));
-                        chart.addLine(lineChart);
-
-                        break;
-                    case "x":
-
-                        valuesX = new long[p.size() - 1];
-
-                        for (int k = 1; k < p.size(); k++) {
-
-                            valuesX[k - 1] = p.get(k).getAsLong();
-                        }
-
-                        break;
-                    default:
-                        throw new JsonGExeption("Wrong type value \"" + typeValString + "\"");
-                }
+            if (i == lines.size() - 1) {
+                checkBox.setBackground(null);
             }
 
         }
+    }
+
+    private void makeCharts(int numChart) {
+
+        chart.getLines().clear();
+
+        LinearLayout container = findViewById(R.id.check_container);
+
+        container.removeAllViews();
+
+        JsonArray rootArray = generateRoot.getAsArray();
+
+        JsonObject obj = rootArray.get(numChart).getAsObject();
+        JsonArray columns = obj.get("columns").getAsArray();
+        JsonObject types = obj.get("types").getAsObject();
+        JsonObject names = obj.get("names").getAsObject();
+        JsonObject colors = obj.get("colors").getAsObject();
+
+        long valuesX[] = new long[0];
+        for (int j = 0; j < columns.getArray().size(); j++) {
+            JsonArray p = columns.get(j).getAsArray();
+
+            String type = p.get(0).getAsString();
+
+            JsonEntity typeVal = types.get(type);
+
+
+            String typeValString = typeVal.getAsString();
+            switch (typeValString) {
+                case "line":
+                    LineChart lineChart = new LineChart();
+
+                    for (int k = 1; k < p.getArray().size(); k++) {
+                        lineChart.addPoint(new ChartPoint(valuesX[k - 1], p.get(k).getAsFloat()));
+                    }
+
+                    lineChart.setName(names.get(type).getAsString());
+                    lineChart.setColorLine(Color.parseColor(colors.get(type).getAsString()));
+                    chart.addLine(lineChart);
+
+                    break;
+                case "x":
+
+                    valuesX = new long[p.size() - 1];
+
+                    for (int k = 1; k < p.size(); k++) {
+
+                        valuesX[k - 1] = p.get(k).getAsLong();
+                    }
+
+                    break;
+                default:
+                    throw new JsonGExeption("Wrong type value \"" + typeValString + "\"");
+            }
+        }
+
+        chart.getDrawThread().requestRender();
+
+        addCheckBox();
 
 
     }
@@ -144,6 +193,39 @@ public class MainActivity extends AppCompatActivity implements LineFormatter {
 
     @Override
     public String getFormatY(float rawY) {
-        return String.valueOf((int)rawY);
+        return String.valueOf((int) rawY);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        int numLine = (int) buttonView.getTag();
+
+        ArrayList<LineChart> lines = chart.getLines();
+
+        chart.getDrawThread().requestRender();
+        lines.get(numLine).setVisible(isChecked);
+    }
+
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        makeCharts(position);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }
