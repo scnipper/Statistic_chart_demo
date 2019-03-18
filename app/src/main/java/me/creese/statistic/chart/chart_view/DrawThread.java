@@ -42,7 +42,7 @@ public class DrawThread extends Thread implements Drawable {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(0x88517da2);
         sizeRect = new SizeRect();
-        legend = new Legend(chart.getLineFormatter());
+        legend = new Legend(chart);
         viewLegend = new ViewLegend();
 
 
@@ -154,14 +154,12 @@ public class DrawThread extends Thread implements Drawable {
             // small bottom lines
             line.setDrawPointCircle(false);
             line.saveNormPoint();
-            //line.setAutoRescale(false);
             line.getMatrix().setTranslate(0, canvas.getHeight() - 120);
             line.normPoints(canvas.getWidth(), 112,maxXYNotRescale);
             line.draw(canvas);
 
             line.restoreNormPoints();
             line.setDrawPointCircle(true);
-            //line.setAutoRescale(true);
             line.getMatrix().setTranslate(xLine, 0);
             line.normPoints(widthLine, height, maxXY);
             line.draw(canvas);
@@ -175,7 +173,6 @@ public class DrawThread extends Thread implements Drawable {
         sizeRect.draw(canvas);
 
         viewLegend.draw(canvas);
-        //matrix.postTranslate(100 * delta, 0);
 
 
     }

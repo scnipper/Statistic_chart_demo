@@ -55,6 +55,10 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
         getHolder().addCallback(this);
     }
 
+    public void clear() {
+        hideViewLegend();
+        lines.clear();
+    }
 
     public void addLine(LineChart lineChart) {
         lines.add(lineChart);
@@ -97,16 +101,9 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                 float y = event.getY();
                 float x = event.getX();
                 ViewLegend viewLegend = drawThread.getViewLegend();
-                drawThread.getLegend().setXVertLine(-1);
-                viewLegend.setVisible(false);
-                viewLegend.getDataViews().clear();
+
+                hideViewLegend();
                 float normX=0;
-                if (circlePoints.size() > 0) {
-                    for (ChartPoint circlePoint : circlePoints) {
-                        circlePoint.setDrawCircle(false);
-                    }
-                    circlePoints.clear();
-                }
                 if (y < getHeight() - DrawThread.BOTTOM_PADDING_CHART) {
 
                     for (LineChart line : lines) {
@@ -114,20 +111,14 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                         for (ChartPoint point : points) {
                             normX = point.getNormX() + line.getTranslateX();
                             if (normX < getWidth()) {
-                                if (x > normX - 30 && x < normX + 30 && line.isVisible()) {
+                                if (x > normX - 15 && x < normX + 15 && line.isVisible()) {
                                     point.setDrawCircle(true);
                                     circlePoints.add(point);
-                                    drawThread.getLegend().setXVertLine( normX);
+                                    Legend legend = drawThread.getLegend();
+                                    legend.setXVertLine( normX);
 
-                                    String headText;
-                                    String value;
-                                    if (lineFormatter != null) {
-                                        headText = lineFormatter.getFormatX(point.getX());
-                                        value = lineFormatter.getFormatY(point.getY());
-                                    } else {
-                                        headText = String.valueOf(point.getX());
-                                        value = String.valueOf(point.getY());
-                                    }
+                                    String headText = legend.getFormatX(point.getX());
+                                    String value = legend.getFormatY(point.getY());
                                     viewLegend.setHeadText(headText);
                                     viewLegend.addDataView(new ViewLegend.DataView(line.getName(),value,line.getColor()));
 
@@ -170,6 +161,19 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
         }
 
         return true;
+    }
+
+    public void hideViewLegend() {
+        drawThread.getLegend().setXVertLine(-1);
+        ViewLegend viewLegend = drawThread.getViewLegend();
+        viewLegend.setVisible(false);
+        viewLegend.getDataViews().clear();
+        if (circlePoints.size() > 0) {
+            for (ChartPoint circlePoint : circlePoints) {
+                circlePoint.setDrawCircle(false);
+            }
+            circlePoints.clear();
+        }
     }
 
     @Override

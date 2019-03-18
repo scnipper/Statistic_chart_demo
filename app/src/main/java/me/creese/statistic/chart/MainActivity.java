@@ -29,6 +29,7 @@ import java.util.Locale;
 
 import me.creese.statistic.chart.chart_view.Chart;
 import me.creese.statistic.chart.chart_view.ChartPoint;
+import me.creese.statistic.chart.chart_view.DrawThread;
 import me.creese.statistic.chart.chart_view.LineChart;
 import me.creese.statistic.chart.chart_view.impl.LineFormatter;
 import me.creese.statistic.chart.jsonget.JsonArray;
@@ -126,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
 
     private void makeCharts(int numChart) {
 
-        chart.getLines().clear();
+        chart.clear();
 
         LinearLayout container = findViewById(R.id.check_container);
 
@@ -213,7 +214,9 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
 
         ArrayList<LineChart> lines = chart.getLines();
 
-        chart.getDrawThread().requestRender();
+        DrawThread drawThread = chart.getDrawThread();
+        drawThread.requestRender();
+        chart.hideViewLegend();
         lines.get(numLine).setVisible(isChecked);
     }
 

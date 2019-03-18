@@ -67,10 +67,6 @@ public class LineChart implements Drawable {
 
     }
 
-    public Matrix getMatrix() {
-        return matrix;
-    }
-
     public void normPoints(int width, int height, ChartPoint max) {
 
         float normX = (width) / max.getX();
@@ -135,6 +131,10 @@ public class LineChart implements Drawable {
         isAutoRescale = autoRescale;
     }
 
+    public Matrix getMatrix() {
+        return matrix;
+    }
+
     public boolean isVisible() {
         return isVisible;
     }
@@ -155,9 +155,6 @@ public class LineChart implements Drawable {
         return offsetX;
     }
 
-    public void setOffsetX(float offsetX) {
-        this.offsetX = offsetX;
-    }
 
     public String getName() {
         return name;
@@ -179,13 +176,22 @@ public class LineChart implements Drawable {
         canvasWidth = canvas.getWidth();
 
         linePath.reset();
+        ChartPoint prePoint = null;
         for (int i = 1; i < points.size(); i++) {
-            ChartPoint prePoint = points.get(i - 1);
+
             ChartPoint point = points.get(i);
 
-            if (i == 1) linePath.moveTo(prePoint.getNormX(), prePoint.getNormY());
+            float translateX = getTranslateX();
+            if(point.getNormX()+translateX < 0) continue;
+
+            if (prePoint == null) {
+                prePoint = points.get(i - 1);
+                linePath.moveTo(prePoint.getNormX(), prePoint.getNormY());
+            }
             linePath.lineTo(point.getNormX(), point.getNormY());
 
+
+            if(point.getNormX()+translateX > canvasWidth) break;
 
         }
         linePath.transform(matrix);

@@ -3,6 +3,8 @@ package me.creese.statistic.chart.chart_view;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import java.util.ArrayList;
+
 import me.creese.statistic.chart.chart_view.impl.Drawable;
 import me.creese.statistic.chart.chart_view.impl.LineFormatter;
 
@@ -10,6 +12,7 @@ public class Legend implements Drawable {
 
     private final Paint textPaint;
     private final LineFormatter lineFormatter;
+    private final Chart chart;
     private float maxValueX;
     private float maxValueY;
     private int countPart;
@@ -22,8 +25,9 @@ public class Legend implements Drawable {
     private float apendPartWidth;
 
 
-    public Legend(LineFormatter lineFormatter) {
-        this.lineFormatter = lineFormatter;
+    public Legend(Chart chart) {
+        this.chart = chart;
+        this.lineFormatter = chart.getLineFormatter();
         countPart = 6;
         countTmp = 6;
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -48,6 +52,32 @@ public class Legend implements Drawable {
         this.countPart = countPart + 1;
         countTmp = countPart + 1;
 
+    }
+
+    public String getFormatY(float value) {
+        String text;
+        if (lineFormatter != null) {
+            text = lineFormatter.getFormatY(value);
+        } else {
+            text = String.valueOf(value);
+        }
+        return text;
+    }
+
+    public String getFormatX(float value) {
+        String text;
+        ArrayList<LineChart> lines = chart.getLines();
+        float offset = 0;
+        if(lines.size() > 0) {
+            offset = lines.get(0).getOffsetX();
+        }
+        value+= offset;
+        if (lineFormatter != null) {
+            text = lineFormatter.getFormatX(value);
+        } else {
+            text = String.valueOf(((long) value));
+        }
+        return text;
     }
 
     public void setMaxValueX(float maxValueX) {
@@ -87,12 +117,8 @@ public class Legend implements Drawable {
         for (int i = 0; i < countPart; i++) {
             float startY = height - partHeight * i;
             int valueY = (int) (partY * i);
-            String text = "";
-            if (lineFormatter != null) {
-                text = lineFormatter.getFormatY(valueY);
-            } else {
-                text = String.valueOf(valueY);
-            }
+            String text = getFormatY(valueY);
+
 
             canvas.drawText(text, 0, startY - 15, textPaint);
             canvas.drawLine(0, startY, canvas.getWidth(), startY, paint);
@@ -105,31 +131,27 @@ public class Legend implements Drawable {
             canvas.drawLine(XVertLine, 0, XVertLine, canvas.getHeight() - DrawThread.BOTTOM_PADDING_CHART, paint);
         }
 
-        textPaint.setTextAlign(Paint.Align.CENTER);
+
         float bX = 0;
         float w = widthLine / (float) countTmp;
 
 
-        if (w > (this.partWidth+apendPartWidth) * 2f) countTmp *= 2;
+        if (w > (this.partWidth) * 2f) countTmp *= 2;
 
-        if (w < (this.partWidth + apendPartWidth)) countTmp /= 2;
+        if (w < (this.partWidth )) countTmp /= 2;
 
 
         for (int i = 0; i < countTmp; i++) {
 
             float perc = bX / widthLine;
-            String text = "";
+            String text = getFormatX(perc * maxValueX).substring(5);
             float xText = bX + XLine;
 
-            if (lineFormatter != null) {
-                text = lineFormatter.getFormatX(perc * maxValueX);
-            } else {
-                text = String.valueOf(((long) (perc * maxValueX)));
-            }
+            if(xText == 0) textPaint.setTextAlign(Paint.Align.LEFT);
+            else textPaint.setTextAlign(Paint.Align.CENTER);
 
-            float measureText = textPaint.measureText(text)/4;
 
-            if(measureText > apendPartWidth) apendPartWidth = measureText;
+
 
             canvas.drawText(text, xText, height + 50, textPaint);
 
