@@ -108,6 +108,7 @@ public class LineChart implements Drawable {
     public void hide() {
 
         isStartHideAnim = true;
+        matrix.setTranslate(getTranslateX(), 0);
     }
 
     public void show() {
@@ -140,8 +141,10 @@ public class LineChart implements Drawable {
     }
 
     public float getTranslateX() {
+
         matrix.getValues(tmpValues);
         return tmpValues[Matrix.MTRANS_X];
+
     }
 
     public float getTranslateY() {
@@ -270,4 +273,6 @@ public class LineChart implements Drawable {
 
 
     }
+
+
 }

@@ -42,6 +42,9 @@ public class ViewLegend implements Drawable {
 
     }
 
+    /**
+     * Fit text to round square
+     */
     public void measureText() {
         paint.setTextSize(40);
         paint.setTypeface(Typeface.DEFAULT_BOLD);
@@ -173,6 +176,9 @@ public class ViewLegend implements Drawable {
 
     }
 
+    /**
+     * Simple struct data
+     */
     public static class DataView {
         public String name;
         public String value;

@@ -27,18 +27,17 @@
 
         <Spinner
             android:id="@+id/spinner"
-            android:layout_width="wrap_content"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"
             android:dropDownWidth="match_parent"
-            android:entries="@android:array/phoneTypes"
             android:spinnerMode="dropdown" />
 
         <me.creese.statistic.chart.chart_view.Chart
             android:id="@+id/stat_chart"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="350dp"
             android:layout_marginBottom="10dp" />
 
         <ScrollView

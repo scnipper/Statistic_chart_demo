@@ -12,18 +12,20 @@ import android.view.SurfaceView;
 
 import java.util.ArrayList;
 
-import me.creese.statistic.chart.MainActivity;
 import me.creese.statistic.chart.chart_view.impl.LineFormatter;
 
 public class Chart extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = Chart.class.getSimpleName();
 
     private DrawThread drawThread;
+    // list of lines
     private ArrayList<LineChart> lines;
     private boolean isHitInSizeRect;
+    // x coordinate when touch down
     private float downX;
     private boolean isHitLeftLine;
     private boolean isHitRightLine;
+    // coordinates where draw circle points
     private ArrayList<ChartPoint> circlePoints;
     private LineFormatter lineFormatter;
 
@@ -56,11 +58,19 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
         getHolder().addCallback(this);
     }
 
+    /**
+     * Clear chart from lines and points
+     */
     public void clear() {
         hideViewLegend();
         lines.clear();
     }
 
+    /**
+     * Add new line to chart
+     *
+     * @param lineChart
+     */
     public void addLine(LineChart lineChart) {
         lines.add(lineChart);
     }
@@ -69,12 +79,12 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
         return lines;
     }
 
-    public void setLineFormatter(LineFormatter lineFormatter) {
-        this.lineFormatter = lineFormatter;
-    }
-
     public LineFormatter getLineFormatter() {
         return lineFormatter;
+    }
+
+    public void setLineFormatter(LineFormatter lineFormatter) {
+        this.lineFormatter = lineFormatter;
     }
 
     public DrawThread getDrawThread() {
@@ -96,7 +106,7 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                 isHitLeftLine = false;
                 break;
             case MotionEvent.ACTION_DOWN:
-                drawThread.requestRender();
+
                 downX = event.getX() - sizeRect.getX();
 
                 float y = event.getY();
@@ -104,39 +114,54 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
                 ViewLegend viewLegend = drawThread.getViewLegend();
 
                 hideViewLegend();
-                float normX=0;
+                float normX = 0;
                 if (y < getHeight() - DrawThread.BOTTOM_PADDING_CHART) {
 
-                    for (LineChart line : lines) {
+                    for (int j = 0; j < lines.size(); j++) {
+                        LineChart line = lines.get(j);
+
                         ArrayList<ChartPoint> points = line.getPoints();
-                        for (ChartPoint point : points) {
-                            normX = point.getNormX() + line.getTranslateX();
-                            if (normX < getWidth()) {
-                                if (x > normX - 15 && x < normX + 15 && line.isVisible()) {
-                                    point.setDrawCircle(true);
-                                    circlePoints.add(point);
+                        float translateX = line.getTranslateX();
+
+                        if (translateX == 0 && drawThread.getSizeRect().getX() > 0) break;
+
+                        for (int i = 0; i < points.size(); i++) {
+                            ChartPoint point = points.get(i);
+
+                            normX = point.getNormX() + translateX;
+                            if (normX < getWidth() && normX > 0) {
+                                if (x > normX - 40 && x < normX + 40 && line.isVisible()) {
                                     Legend legend = drawThread.getLegend();
-                                    legend.setXVertLine( normX);
-
-                                    String headText = legend.getFormatX(point.getX());
-                                    String value = legend.getFormatY(point.getY());
-                                    viewLegend.setHeadText(headText);
-                                    viewLegend.addDataView(new ViewLegend.DataView(line.getName(),value,line.getColor()));
+                                    for (int k = 0; k < lines.size(); k++) {
+                                        LineChart lineChart = lines.get(k);
+                                        if (lineChart.isVisible()) {
 
 
+                                            ChartPoint pointHit = lineChart.getPoints().get(i);
+                                            pointHit.setDrawCircle(true);
+                                            circlePoints.add(pointHit);
 
-                                    break;
+                                            String headText = legend.getFormatX(pointHit.getX());
+                                            String value = legend.getFormatY(pointHit.getY());
+                                            viewLegend.setHeadText(headText);
+                                            viewLegend.addDataView(new ViewLegend.DataView(lineChart.getName(), value, lineChart.getColor()));
+                                        }
+                                    }
+                                    legend.setXVertLine(normX);
+
+                                    if (viewLegend.getDataViews().size() > 0) {
+                                        viewLegend.measureText();
+                                        viewLegend.setVisible(true);
+                                        viewLegend.setX(normX - 70);
+                                        viewLegend.setY(100);
+                                    }
+                                    drawThread.requestRender();
+                                    return true;
                                 }
-                            } else break;
+                            }
                         }
                     }
 
-                    if(viewLegend.getDataViews().size() > 0) {
-                        viewLegend.measureText();
-                        viewLegend.setVisible(true);
-                        viewLegend.setX(normX - 70);
-                        viewLegend.setY(100);
-                    }
 
                     break;
                 }
@@ -164,6 +189,9 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
         return true;
     }
 
+    /**
+     * Hide view legend from chart
+     */
     public void hideViewLegend() {
         drawThread.getLegend().setXVertLine(-1);
         ViewLegend viewLegend = drawThread.getViewLegend();
@@ -175,12 +203,6 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
             }
             circlePoints.clear();
         }
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(getMeasuredWidth(), (int) (MainActivity.HEIGHT_SCREEN * 0.6f));
     }
 
 

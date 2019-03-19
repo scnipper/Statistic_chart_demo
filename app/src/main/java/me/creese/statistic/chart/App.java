@@ -10,6 +10,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
+        // get theme form preferences
         SharedPreferences theme = getSharedPreferences(PERF_THEME, MODE_PRIVATE);
 
         ThemeWrapper.get().init(theme.getInt("t",R.style.AppThemeDay),this);

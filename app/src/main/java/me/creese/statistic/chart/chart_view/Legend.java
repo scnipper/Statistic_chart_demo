@@ -14,16 +14,21 @@ public class Legend implements Drawable {
     private final Paint textPaint;
     private final LineFormatter lineFormatter;
     private final Chart chart;
+    // max value x from json data
     private float maxValueX;
+    // max value y from json data
     private float maxValueY;
-    private int countPart;
     private Paint paint;
+    // x position lines
     private float XLine;
+    // width chart line in screen coordinates
     private float widthLine;
+    // position draw vertical line
     private float XVertLine;
+    // count part divide screen
+    private int countPart;
     private int countTmp;
     private float partWidth;
-    private float apendPartWidth;
 
 
     public Legend(Chart chart) {
@@ -55,6 +60,11 @@ public class Legend implements Drawable {
 
     }
 
+    /**
+     * Return format value y. Use {@link LineFormatter} or just return return raw string
+     * @param value
+     * @return
+     */
     public String getFormatY(float value) {
         String text;
         if (lineFormatter != null) {
@@ -65,6 +75,11 @@ public class Legend implements Drawable {
         return text;
     }
 
+    /**
+     * Return format value x. Use {@link LineFormatter} or just return return raw string
+     * @param value
+     * @return
+     */
     public String getFormatX(float value) {
         String text;
         ArrayList<LineChart> lines = chart.getLines();
@@ -102,28 +117,19 @@ public class Legend implements Drawable {
         this.XVertLine = xVertLine;
     }
 
-    @Override
-    public void draw(Canvas canvas) {
+    /**
+     * Draw grid of chart
+     * @param canvas
+     */
+    public void drawGrid(Canvas canvas) {
+        textPaint.setTextAlign(Paint.Align.LEFT);
         int height = canvas.getHeight() - DrawThread.BOTTOM_PADDING_CHART;
-
         float partHeight = height / (float) (countPart);
 
-        if (partWidth == 0) {
-            partWidth = canvas.getWidth() / (float) countTmp;
-        }
-
-        float partY = maxValueY / (countPart);
-        textPaint.setTextAlign(Paint.Align.LEFT);
         // draw separate lines
         for (int i = 0; i < countPart; i++) {
             float startY = height - partHeight * i;
-            int valueY = (int) (partY * i);
-            String text = getFormatY(valueY);
-
-
-            canvas.drawText(text, 0, startY - 15, textPaint);
             canvas.drawLine(0, startY, canvas.getWidth(), startY, paint);
-
         }
 
         // vertical line
@@ -131,6 +137,26 @@ public class Legend implements Drawable {
         if (XVertLine != -1) {
             canvas.drawLine(XVertLine, 0, XVertLine, canvas.getHeight() - DrawThread.BOTTOM_PADDING_CHART, paint);
         }
+    }
+    @Override
+    public void draw(Canvas canvas) {
+        int height = canvas.getHeight() - DrawThread.BOTTOM_PADDING_CHART;
+
+
+
+        if (partWidth == 0) {
+            partWidth = canvas.getWidth() / (float) countTmp;
+        }
+
+        float partHeight = height / (float) (countPart);
+        float partY = maxValueY / (countPart);
+        for (int i = 0; i < countPart; i++) {
+            float startY = height - partHeight * i;
+            int valueY = (int) (partY * i);
+            String text = getFormatY(valueY);
+            canvas.drawText(text, 0, startY - 15, textPaint);
+        }
+
 
 
         float bX = 0;

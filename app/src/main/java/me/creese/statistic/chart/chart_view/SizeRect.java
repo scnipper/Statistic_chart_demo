@@ -1,7 +1,6 @@
 package me.creese.statistic.chart.chart_view;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 
 import me.creese.statistic.chart.ThemeWrapper;
@@ -10,6 +9,7 @@ import me.creese.statistic.chart.chart_view.impl.Drawable;
 public class SizeRect implements Drawable {
 
     private final Paint paint;
+    // width of the left and right sides for which you can change the size of the graph
     private final int widthLeftAndRightLines;
     private float width;
     private float height;
@@ -33,6 +33,39 @@ public class SizeRect implements Drawable {
         y = 0;
     }
 
+
+
+    /**
+     * When hit in right side.
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    public boolean hitRightLine(float x, float y) {
+        return x > this.x + (width - widthLeftAndRightLines) && x < this.x + width + 20 && y > heightCanvas - height && y < heightCanvas - this.y;
+    }
+
+    /**
+     * When hit in left side
+     *
+     * @param x
+     * @param y
+     * @return
+     */
+    public boolean hitLeftLine(float x, float y) {
+        return x > this.x - 20 && x < this.x + widthLeftAndRightLines && y > heightCanvas - height && y < heightCanvas - this.y;
+    }
+
+    /**
+     * Hit in all of square. Move him left and right
+     * @param x
+     * @param y
+     * @return
+     */
+    public boolean hit(float x, float y) {
+        return x > this.x + widthLeftAndRightLines && x < (this.x + width) - widthLeftAndRightLines && y > heightCanvas - height && y < heightCanvas - this.y;
+    }
     public float getX() {
         return x;
     }
@@ -58,25 +91,11 @@ public class SizeRect implements Drawable {
 
 
         float tmpX = x;
-        if(width > 50)
-        x = left;
+        if (width > 50) x = left;
         setWidth(width + (tmpX - left));
 
 
     }
-
-    public boolean hitRightLine(float x, float y) {
-        return x > this.x + (width - widthLeftAndRightLines) && x < this.x + width + 20 && y > heightCanvas - height && y < heightCanvas - this.y;
-    }
-
-    public boolean hitLeftLine(float x, float y) {
-        return x > this.x - 20 && x < this.x + widthLeftAndRightLines && y > heightCanvas - height && y < heightCanvas - this.y;
-    }
-
-    public boolean hit(float x, float y) {
-        return x > this.x + widthLeftAndRightLines && x < (this.x + width) - widthLeftAndRightLines && y > heightCanvas - height && y < heightCanvas - this.y;
-    }
-
     @Override
     public void draw(Canvas canvas) {
         if (widthCanvas == -1 || heightCanvas == -1) {
@@ -84,8 +103,8 @@ public class SizeRect implements Drawable {
             heightCanvas = canvas.getHeight();
         }
         float _y = canvas.getHeight() - y;
-        canvas.drawRect(x, canvas.getHeight()-2.5f, x + widthLeftAndRightLines, canvas.getHeight() - height+2.5f, paint);
-        canvas.drawRect(x + width - widthLeftAndRightLines, canvas.getHeight()-2.5f, x + width, canvas.getHeight() - height+2.5f, paint);
+        canvas.drawRect(x, canvas.getHeight() - 2.5f, x + widthLeftAndRightLines, canvas.getHeight() - height + 2.5f, paint);
+        canvas.drawRect(x + width - widthLeftAndRightLines, canvas.getHeight() - 2.5f, x + width, canvas.getHeight() - height + 2.5f, paint);
 
         canvas.drawLine(x, _y - 2.5f, x + width, _y - 2.5f, paint);
         canvas.drawLine(x, _y - height + 2.5f, x + width, _y - height + 2.5f, paint);

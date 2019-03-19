@@ -3,15 +3,14 @@ package me.creese.statistic.chart;
 import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,7 +41,7 @@ import me.creese.statistic.chart.jsonget.JsonObject;
 public class MainActivity extends AppCompatActivity implements LineFormatter, CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    public static float HEIGHT_SCREEN;
+
     private Chart chart;
     private JsonEntity generateRoot;
 
@@ -51,19 +50,8 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
         super.onCreate(savedInstanceState);
         setTheme(ThemeWrapper.get().getCurrTheme());
         setContentView(R.layout.activity_main);
-
-
         findViewById(R.id.container).setBackground(new ColorDrawable(ThemeWrapper.CONTAINER_COLOR));
-
-
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        HEIGHT_SCREEN = size.y;
-
-
         Toolbar toolbar = findViewById(R.id.toolbar);
-
         setSupportActionBar(toolbar);
 
 
@@ -81,7 +69,6 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
             JsonG jsonG = new JsonG();
 
             generateRoot = jsonG.generateRoot(fullJson);
-            //makeCharts(0);
 
 
         } catch (IOException e) {
@@ -89,10 +76,15 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
         }
 
 
-
-
-
         Spinner spinner = findViewById(R.id.spinner);
+
+
+        Drawable spinnerDrawable = spinner.getBackground().getConstantState().newDrawable();
+
+        spinnerDrawable.setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
+
+        spinner.setBackground(spinnerDrawable);
+
 
         spinner.setOnItemSelectedListener(this);
         ArrayAdapter<String> stringArrayAdapter = new ArrayAdapter<>(this, R.layout.spinner_text);
@@ -106,6 +98,9 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
 
     }
 
+    /**
+     * Make checkboxes for chart lines
+     */
     @SuppressLint("RestrictedApi")
     private void addCheckBox() {
         ArrayList<LineChart> lines = chart.getLines();
@@ -131,6 +126,10 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
         }
     }
 
+    /**
+     * Make chart from json root
+     * @param numChart num of chart
+     */
     private void makeCharts(int numChart) {
 
         chart.clear();
@@ -209,11 +208,14 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
         return true;
     }
 
+    /**
+     * Change theme when tap moon icon
+     *
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
-        //setTheme(R.style.AppThemeDay);
-
         ThemeWrapper.get().switchTheme();
         recreate();
 
@@ -222,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
 
     /**
      * Check box line change clicked
+     *
      * @param buttonView
      * @param isChecked
      */
@@ -232,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
         ArrayList<LineChart> lines = chart.getLines();
         LineChart lineChart = lines.get(numLine);
 
-        if(lineChart.isStartHideAnim() || lineChart.isStartShowAnim()) {
+        if (lineChart.isStartHideAnim() || lineChart.isStartShowAnim()) {
             buttonView.setChecked(!isChecked);
             return;
         }
@@ -242,18 +245,24 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
         drawThread.requestRender();
         chart.hideViewLegend();
 
-        if(!isChecked) {
+        if (!isChecked) {
 
             lineChart.hide();
-        }
-        else {
+        } else {
 
             lineChart.show();
         }
     }
 
 
-
+    /**
+     * Select chart in spinner
+     *
+     * @param parent
+     * @param view
+     * @param position
+     * @param id
+     */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         makeCharts(position);

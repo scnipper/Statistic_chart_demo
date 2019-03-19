@@ -1,7 +1,6 @@
 package me.creese.statistic.chart.chart_view;
 
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.view.SurfaceHolder;
 
@@ -23,19 +22,17 @@ public class DrawThread extends Thread implements Drawable {
     private final ViewLegend viewLegend;
 
     private long prevTime;
-    private Matrix matrix;
     private boolean running;
     private boolean pause;
+    // time between last frame and current frame in seconds
     private float delta;
     private int frameToPause;
 
     public DrawThread(Chart chart) {
+        super("Render");
         this.chart = chart;
 
         clearTime();
-
-        matrix = new Matrix();
-        matrix.reset();
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
         paint.setAntiAlias(true);
@@ -48,10 +45,18 @@ public class DrawThread extends Thread implements Drawable {
 
     }
 
+    /**
+     * Set actual time
+     */
     public void clearTime() {
         prevTime = System.nanoTime();
     }
 
+    /**
+     * Return max value x and y ChartPoint between all lines
+     * @param isRescale if true max value only screen coord
+     * @return
+     */
     public ChartPoint getMaxValueLines(boolean isRescale) {
         float maxX = 0;
         float maxY = 0;
@@ -69,6 +74,9 @@ public class DrawThread extends Thread implements Drawable {
 
     }
 
+    /**
+     * Render stops after a while "FRAME_TO_PAUSE_RENDER". This method will resume render.
+     */
     public void requestRender() {
         pause = false;
         frameToPause = 0;
@@ -95,6 +103,9 @@ public class DrawThread extends Thread implements Drawable {
         return viewLegend;
     }
 
+    /**
+     * Main loop drawing
+     */
     @Override
     public void run() {
         while (running) {
@@ -149,8 +160,10 @@ public class DrawThread extends Thread implements Drawable {
         legend.setXLine(xLine);
         legend.setWidthLine(widthLine);
 
-        legend.draw(canvas);
-        for (LineChart line : lines) {
+        legend.drawGrid(canvas);
+        for (int i = 0; i < lines.size(); i++) {
+            LineChart line = lines.get(i);
+
             line.setDelta(delta);
             int height = canvas.getHeight() - BOTTOM_PADDING_CHART;
             // small bottom lines
@@ -163,10 +176,8 @@ public class DrawThread extends Thread implements Drawable {
                 line.normPoints(canvas.getWidth(), 112, maxXYNotRescale);
                 line.draw(canvas);
                 line.restoreNormPoints();
-            } /*else {
-                requestRender();
-            }*/
-
+            }
+            // main lines
             line.setDrawPointCircle(true);
             if (!line.isStartHideAnim() && !line.isStartShowAnim()) {
                 line.getMatrix().setTranslate(xLine, 0);
@@ -177,6 +188,7 @@ public class DrawThread extends Thread implements Drawable {
 
         }
 
+        legend.draw(canvas);
         canvas.drawRect(0, canvas.getHeight() - BOTTOM_PADDING, sizeRect.getX(), canvas.getHeight(), paint);
         canvas.drawRect(sizeRect.getX() + sizeRect.getWidth(), canvas.getHeight() - BOTTOM_PADDING, canvas.getWidth(), canvas.getHeight(), paint);
 

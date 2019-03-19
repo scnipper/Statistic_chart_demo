@@ -21,10 +21,11 @@ public class JsonG {
 
     private int index;
 
-    public JsonG() {
-    }
-
-
+    /**
+     * Generate root json file
+     * @param json
+     * @return
+     */
     public JsonEntity generateRoot(String json) {
 
         char[] chars = new char[json.length()];
@@ -49,6 +50,11 @@ public class JsonG {
         return null;
     }
 
+    /**
+     * Generate json array
+     * @param chars
+     * @return
+     */
     private JsonEntity readArray(char[] chars) {
         StringBuilder sb = new StringBuilder();
         JsonArray jsonArray = new JsonArray();
@@ -87,6 +93,11 @@ public class JsonG {
         return jsonArray;
     }
 
+    /**
+     * Generate json object
+     * @param chars
+     * @return
+     */
     private JsonEntity readObject(char[] chars) {
         StringBuilder sb = new StringBuilder();
         JsonObject jsonObject = new JsonObject();

@@ -1,10 +1,15 @@
 package me.creese.statistic.chart.chart_view;
 
 public class ChartPoint {
+    // x value from data json
     private float x;
+    // y value from data json
     private float y;
+    // x value to screen coordinates
     private float normX;
+    // y value to screen coordinates
     private float normY;
+    // if true draw circle point
     private boolean drawCircle;
 
 
