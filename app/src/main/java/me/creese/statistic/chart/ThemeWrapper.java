@@ -1,6 +1,7 @@
 package me.creese.statistic.chart;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
@@ -53,9 +54,18 @@ public class ThemeWrapper {
     }
 
     public void switchTheme() {
+        int initTheme = 0;
         if(currTheme == R.style.AppThemeDay) {
-            init(R.style.AppThemeNight,context);
-        } else init(R.style.AppThemeDay,context);
+            initTheme = R.style.AppThemeNight;
+        } else initTheme = R.style.AppThemeDay;
+        SharedPreferences pref = context.getSharedPreferences(App.PERF_THEME, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = pref.edit();
+
+        editor.putInt("t",initTheme);
+        editor.apply();
+
+        init(initTheme,context);
     }
 
     public int getCurrTheme() {

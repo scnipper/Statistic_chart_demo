@@ -1,7 +1,6 @@
 package me.creese.statistic.chart.chart_view;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -13,6 +12,7 @@ import me.creese.statistic.chart.chart_view.impl.Drawable;
 
 public class LineChart implements Drawable {
     private static final String TAG = LineChart.class.getSimpleName();
+    private static final int VELOVITY = 5000;
     private final Paint paint;
     private final Paint dotPaint;
     private ArrayList<ChartPoint> points;
@@ -27,6 +27,10 @@ public class LineChart implements Drawable {
     private boolean isDrawPointCircle;
     private float offsetX;
     private String name;
+    private float delta;
+    private boolean isStartHideAnim;
+    private int canvasHeight;
+    private boolean isStartShowAnim;
 
 
     public LineChart() {
@@ -101,6 +105,19 @@ public class LineChart implements Drawable {
         return max;
     }
 
+    public void hide() {
+
+        isStartHideAnim = true;
+    }
+
+    public void show() {
+
+        matrix.setTranslate(getTranslateX(), -canvasHeight);
+        isStartShowAnim = true;
+        isVisible = true;
+
+    }
+
     public void restoreNormPoints() {
         for (int i = 0; i < points.size(); i++) {
             ChartPoint point = points.get(i);
@@ -125,6 +142,11 @@ public class LineChart implements Drawable {
     public float getTranslateX() {
         matrix.getValues(tmpValues);
         return tmpValues[Matrix.MTRANS_X];
+    }
+
+    public float getTranslateY() {
+        matrix.getValues(tmpValues);
+        return tmpValues[Matrix.MTRANS_Y];
     }
 
     public void setAutoRescale(boolean autoRescale) {
@@ -155,6 +177,13 @@ public class LineChart implements Drawable {
         return offsetX;
     }
 
+    public boolean isStartHideAnim() {
+        return isStartHideAnim;
+    }
+
+    public boolean isStartShowAnim() {
+        return isStartShowAnim;
+    }
 
     public String getName() {
         return name;
@@ -168,12 +197,16 @@ public class LineChart implements Drawable {
         return paint.getColor();
     }
 
+    public void setDelta(float delta) {
+        this.delta = delta;
+    }
+
     @Override
     public void draw(Canvas canvas) {
-
+        canvasWidth = canvas.getWidth();
+        canvasHeight = canvas.getWidth();
         if (!isVisible) return;
 
-        canvasWidth = canvas.getWidth();
 
         linePath.reset();
         ChartPoint prePoint = null;
@@ -182,7 +215,7 @@ public class LineChart implements Drawable {
             ChartPoint point = points.get(i);
 
             float translateX = getTranslateX();
-            if(point.getNormX()+translateX < 0) continue;
+            if (point.getNormX() + translateX < 0) continue;
 
             if (prePoint == null) {
                 prePoint = points.get(i - 1);
@@ -191,11 +224,39 @@ public class LineChart implements Drawable {
             linePath.lineTo(point.getNormX(), point.getNormY());
 
 
-            if(point.getNormX()+translateX > canvasWidth) break;
+            if (point.getNormX() + translateX > canvasWidth) break;
 
         }
+
+
         linePath.transform(matrix);
         canvas.drawPath(linePath, paint);
+
+        if (isStartHideAnim) {
+            matrix.preTranslate(0, -VELOVITY * delta);
+
+            float translateY = getTranslateY();
+
+
+            if (translateY < -canvas.getHeight()) {
+                isStartHideAnim = false;
+
+                isVisible = false;
+            }
+
+        }
+
+        if (isStartShowAnim) {
+            matrix.preTranslate(0, VELOVITY * delta);
+
+            float translateY = getTranslateY();
+
+
+            if (translateY >= 0) {
+                isStartShowAnim = false;
+            }
+        }
+
         if (isDrawPointCircle) {
 
             float translateX = getTranslateX();

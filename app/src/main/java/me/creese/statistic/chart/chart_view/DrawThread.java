@@ -1,10 +1,8 @@
 package me.creese.statistic.chart.chart_view;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.view.SurfaceHolder;
 
 import java.util.ArrayList;
@@ -34,7 +32,7 @@ public class DrawThread extends Thread implements Drawable {
     public DrawThread(Chart chart) {
         this.chart = chart;
 
-        prevTime = System.nanoTime();
+        clearTime();
 
         matrix = new Matrix();
         matrix.reset();
@@ -50,12 +48,16 @@ public class DrawThread extends Thread implements Drawable {
 
     }
 
+    public void clearTime() {
+        prevTime = System.nanoTime();
+    }
+
     public ChartPoint getMaxValueLines(boolean isRescale) {
         float maxX = 0;
         float maxY = 0;
 
         for (LineChart line : chart.getLines()) {
-            if(line.isVisible()) {
+            if (line.isVisible()) {
                 line.setAutoRescale(isRescale);
                 ChartPoint maxXY = line.getMaxXY();
 
@@ -66,6 +68,7 @@ public class DrawThread extends Thread implements Drawable {
         return new ChartPoint(maxX, maxY);
 
     }
+
     public void requestRender() {
         pause = false;
         frameToPause = 0;
@@ -83,9 +86,6 @@ public class DrawThread extends Thread implements Drawable {
         return sizeRect;
     }
 
-    public float getDelta() {
-        return delta;
-    }
 
     public Legend getLegend() {
         return legend;
@@ -119,9 +119,8 @@ public class DrawThread extends Thread implements Drawable {
 
                 frameToPause++;
 
-                if(frameToPause >= FRAME_TO_PAUSE_RENDER) pause = true;
+                if (frameToPause >= FRAME_TO_PAUSE_RENDER) pause = true;
             }
-
 
 
         }
@@ -132,10 +131,10 @@ public class DrawThread extends Thread implements Drawable {
 
         canvas.drawColor(ThemeWrapper.CONTAINER_COLOR);
 
-        Paint text = new Paint();
+        /*Paint text = new Paint();
         text.setTextSize(50);
         text.setColor(Color.BLACK);
-        canvas.drawText((int) (1 / delta) + " fps", 0, 60, text);
+        canvas.drawText((int) (1 / delta) + " fps", 0, 60, text);*/
 
 
         ArrayList<LineChart> lines = chart.getLines();
@@ -152,17 +151,26 @@ public class DrawThread extends Thread implements Drawable {
 
         legend.draw(canvas);
         for (LineChart line : lines) {
+            line.setDelta(delta);
             int height = canvas.getHeight() - BOTTOM_PADDING_CHART;
             // small bottom lines
-            line.setDrawPointCircle(false);
-            line.saveNormPoint();
-            line.getMatrix().setTranslate(0, canvas.getHeight() - 120);
-            line.normPoints(canvas.getWidth(), 112,maxXYNotRescale);
-            line.draw(canvas);
+            if (!line.isStartHideAnim() && !line.isStartShowAnim()) {
+                line.setDrawPointCircle(false);
+                line.saveNormPoint();
 
-            line.restoreNormPoints();
+                line.getMatrix().setTranslate(0, canvas.getHeight() - 120);
+
+                line.normPoints(canvas.getWidth(), 112, maxXYNotRescale);
+                line.draw(canvas);
+                line.restoreNormPoints();
+            } /*else {
+                requestRender();
+            }*/
+
             line.setDrawPointCircle(true);
-            line.getMatrix().setTranslate(xLine, 0);
+            if (!line.isStartHideAnim() && !line.isStartShowAnim()) {
+                line.getMatrix().setTranslate(xLine, 0);
+            }
             line.normPoints(widthLine, height, maxXY);
             line.draw(canvas);
 

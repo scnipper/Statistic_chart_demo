@@ -220,16 +220,36 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
         return true;
     }
 
+    /**
+     * Check box line change clicked
+     * @param buttonView
+     * @param isChecked
+     */
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         int numLine = (int) buttonView.getTag();
 
         ArrayList<LineChart> lines = chart.getLines();
+        LineChart lineChart = lines.get(numLine);
+
+        if(lineChart.isStartHideAnim() || lineChart.isStartShowAnim()) {
+            buttonView.setChecked(!isChecked);
+            return;
+        }
 
         DrawThread drawThread = chart.getDrawThread();
+        drawThread.clearTime();
         drawThread.requestRender();
         chart.hideViewLegend();
-        lines.get(numLine).setVisible(isChecked);
+
+        if(!isChecked) {
+
+            lineChart.hide();
+        }
+        else {
+
+            lineChart.show();
+        }
     }
 
 
