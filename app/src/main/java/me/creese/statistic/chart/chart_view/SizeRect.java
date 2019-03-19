@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import me.creese.statistic.chart.ThemeWrapper;
 import me.creese.statistic.chart.chart_view.impl.Drawable;
 
 public class SizeRect implements Drawable {
@@ -24,7 +25,7 @@ public class SizeRect implements Drawable {
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);
-        paint.setColor(0xbbdbe7f0);
+        paint.setColor(ThemeWrapper.SIZE_RECT_COLOR);
         paint.setStrokeWidth(5);
         width = 200;
         height = 125;
@@ -83,8 +84,8 @@ public class SizeRect implements Drawable {
             heightCanvas = canvas.getHeight();
         }
         float _y = canvas.getHeight() - y;
-        canvas.drawRect(x, canvas.getHeight(), x + widthLeftAndRightLines, canvas.getHeight() - height, paint);
-        canvas.drawRect(x + width - widthLeftAndRightLines, canvas.getHeight(), x + width, canvas.getHeight() - height, paint);
+        canvas.drawRect(x, canvas.getHeight()-2.5f, x + widthLeftAndRightLines, canvas.getHeight() - height+2.5f, paint);
+        canvas.drawRect(x + width - widthLeftAndRightLines, canvas.getHeight()-2.5f, x + width, canvas.getHeight() - height+2.5f, paint);
 
         canvas.drawLine(x, _y - 2.5f, x + width, _y - 2.5f, paint);
         canvas.drawLine(x, _y - height + 2.5f, x + width, _y - height + 2.5f, paint);

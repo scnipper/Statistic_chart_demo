@@ -1,6 +1,7 @@
 package me.creese.statistic.chart.chart_view;
 
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -188,6 +189,7 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
         drawThread = new DrawThread(this);
         drawThread.setRunning(true);
         drawThread.start();
+        holder.setFormat(PixelFormat.RGBA_8888);
     }
 
     @Override

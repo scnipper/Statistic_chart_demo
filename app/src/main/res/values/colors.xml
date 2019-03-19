@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#517DA2</color>
+    <color name="colorPrimaryDarkTheme">#212d3b</color>
     <color name="colorPrimaryDark">#426382</color>
+    <color name="colorPrimaryDarkNight">#1a242e</color>
     <color name="colorAccent">#3896D4</color>
 
     <color name="colorBackgroundLight">#f0f0f0</color>
+
+    <color name="chartLineColor">#ffe7e8e9</color>
+    <color name="chartLineColorNight">#ff161f2b</color>
+    <color name="containerColorNight">#ff1d2733</color>
+
 </resources>

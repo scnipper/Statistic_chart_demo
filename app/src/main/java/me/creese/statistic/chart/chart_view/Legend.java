@@ -5,6 +5,7 @@ import android.graphics.Paint;
 
 import java.util.ArrayList;
 
+import me.creese.statistic.chart.ThemeWrapper;
 import me.creese.statistic.chart.chart_view.impl.Drawable;
 import me.creese.statistic.chart.chart_view.impl.LineFormatter;
 
@@ -35,11 +36,11 @@ public class Legend implements Drawable {
         XVertLine = -1;
 
         paint.setStrokeWidth(2);
-        paint.setColor(0xffe7e8e9);
+        paint.setColor(ThemeWrapper.CHART_LINE_COLOR);
 
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setAntiAlias(true);
-        textPaint.setColor(0xff96a2aa);
+        textPaint.setColor(ThemeWrapper.CHART_TEXT_COLOR);
         textPaint.setTextSize(37);
 
     }

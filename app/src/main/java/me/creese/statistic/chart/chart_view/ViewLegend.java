@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 
 import java.util.ArrayList;
 
+import me.creese.statistic.chart.ThemeWrapper;
 import me.creese.statistic.chart.chart_view.impl.Drawable;
 
 public class ViewLegend implements Drawable {
@@ -128,7 +129,7 @@ public class ViewLegend implements Drawable {
         canvasWidth = canvas.getWidth();
         if (!isVisible) return;
 
-        paint.setColor(Color.WHITE);
+        paint.setColor(ThemeWrapper.VIEW_LEGEND_BACKGROUND_COLOR);
         paint.setStyle(Paint.Style.FILL);
 
         bound.set(x, y, x + width, y + height);
@@ -136,11 +137,11 @@ public class ViewLegend implements Drawable {
 
         canvas.drawRoundRect(bound, 12, 12, paint);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(0xffe7e8e9);
+        paint.setColor(ThemeWrapper.CHART_LINE_COLOR);
         canvas.drawRoundRect(bound, 12, 12, paint);
         paint.setStyle(Paint.Style.FILL);
 
-        paint.setColor(Color.BLACK);
+        paint.setColor(ThemeWrapper.TEXT_COLOR);
         paint.setTextSize(40);
 
         float xText = this.x +PADDING_TEXT;

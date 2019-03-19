@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -48,7 +49,11 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(ThemeWrapper.get().getCurrTheme());
         setContentView(R.layout.activity_main);
+
+
+        findViewById(R.id.container).setBackground(new ColorDrawable(ThemeWrapper.CONTAINER_COLOR));
 
 
         Display display = getWindowManager().getDefaultDisplay();
@@ -113,13 +118,14 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
             ColorStateList colorStateList = new ColorStateList(new int[][]{new int[]{-android.R.attr.state_checked}, new int[]{android.R.attr.state_checked}}, new int[]{line.getColor(), line.getColor()});
             checkBox.setSupportButtonTintList(colorStateList);
             checkBox.setText(line.getName());
+            checkBox.setTextColor(ThemeWrapper.TEXT_COLOR);
             container.addView(checkBox);
 
             checkBox.setTag(i);
             checkBox.setOnCheckedChangeListener(this);
 
-            if (i == lines.size() - 1) {
-                checkBox.setBackground(null);
+            if (i < lines.size() - 1) {
+                checkBox.setBackground(ThemeWrapper.backgroundCheckbox);
             }
 
         }
@@ -205,7 +211,13 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+
+        //setTheme(R.style.AppThemeDay);
+
+        ThemeWrapper.get().switchTheme();
+        recreate();
+
+        return true;
     }
 
     @Override

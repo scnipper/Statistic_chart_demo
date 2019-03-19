@@ -8,6 +8,7 @@ import android.graphics.Path;
 
 import java.util.ArrayList;
 
+import me.creese.statistic.chart.ThemeWrapper;
 import me.creese.statistic.chart.chart_view.impl.Drawable;
 
 public class LineChart implements Drawable {
@@ -44,8 +45,7 @@ public class LineChart implements Drawable {
         dotPaint.setAntiAlias(true);
         dotPaint.setStyle(Paint.Style.FILL);
         dotPaint.setStrokeWidth(6);
-        dotPaint.setColor(Color.WHITE);
-        setColorLine(Color.RED);
+        dotPaint.setColor(ThemeWrapper.CONTAINER_COLOR);
 
         isVisible = true;
     }

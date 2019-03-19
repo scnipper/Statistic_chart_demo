@@ -4,10 +4,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.view.SurfaceHolder;
 
 import java.util.ArrayList;
 
+import me.creese.statistic.chart.ThemeWrapper;
 import me.creese.statistic.chart.chart_view.impl.Drawable;
 
 public class DrawThread extends Thread implements Drawable {
@@ -40,7 +42,7 @@ public class DrawThread extends Thread implements Drawable {
 
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0x88517da2);
+        paint.setColor(ThemeWrapper.BOTTOM_SQUARES_COLOR);
         sizeRect = new SizeRect();
         legend = new Legend(chart);
         viewLegend = new ViewLegend();
@@ -128,7 +130,7 @@ public class DrawThread extends Thread implements Drawable {
     @Override
     public void draw(Canvas canvas) {
 
-        canvas.drawColor(Color.WHITE);
+        canvas.drawColor(ThemeWrapper.CONTAINER_COLOR);
 
         Paint text = new Paint();
         text.setTextSize(50);
