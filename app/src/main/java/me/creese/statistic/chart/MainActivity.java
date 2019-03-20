@@ -1,21 +1,20 @@
 package me.creese.statistic.chart;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatCheckBox;
-import android.support.v7.widget.Toolbar;
 import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -38,7 +37,7 @@ import me.creese.statistic.chart.jsonget.JsonG;
 import me.creese.statistic.chart.jsonget.JsonGExeption;
 import me.creese.statistic.chart.jsonget.JsonObject;
 
-public class MainActivity extends AppCompatActivity implements LineFormatter, CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
+public class MainActivity extends Activity implements LineFormatter, CompoundButton.OnCheckedChangeListener, AdapterView.OnItemSelectedListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -51,8 +50,8 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
         setTheme(ThemeWrapper.get().getCurrTheme());
         setContentView(R.layout.activity_main);
         findViewById(R.id.container).setBackground(new ColorDrawable(ThemeWrapper.CONTAINER_COLOR));
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+
+        getActionBar().setTitle("Statistics");
 
 
         chart = findViewById(R.id.stat_chart);
@@ -108,10 +107,10 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
         LinearLayout container = findViewById(R.id.check_container);
         for (int i = 0; i < lines.size(); i++) {
             LineChart line = lines.get(i);
-            AppCompatCheckBox checkBox = new AppCompatCheckBox(new ContextThemeWrapper(this, R.style.CheckBoxStyle), null, 0);
+            CheckBox checkBox = new CheckBox(new ContextThemeWrapper(this, R.style.CheckBoxStyle), null, 0);
 
             ColorStateList colorStateList = new ColorStateList(new int[][]{new int[]{-android.R.attr.state_checked}, new int[]{android.R.attr.state_checked}}, new int[]{line.getColor(), line.getColor()});
-            checkBox.setSupportButtonTintList(colorStateList);
+            checkBox.setButtonTintList(colorStateList);
             checkBox.setText(line.getName());
             checkBox.setTextColor(ThemeWrapper.TEXT_COLOR);
             container.addView(checkBox);
@@ -128,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements LineFormatter, Co
 
     /**
      * Make chart from json root
+     *
      * @param numChart num of chart
      */
     private void makeCharts(int numChart) {

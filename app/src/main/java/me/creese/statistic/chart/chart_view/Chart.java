@@ -1,10 +1,9 @@
 package me.creese.statistic.chart.chart_view;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.os.Build;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -35,18 +34,19 @@ public class Chart extends SurfaceView implements SurfaceHolder.Callback {
         init();
     }
 
-    public Chart(Context context, @Nullable AttributeSet attrs) {
+    public Chart(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public Chart(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public Chart(Context context,  AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public Chart(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public Chart(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
